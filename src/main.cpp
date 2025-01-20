@@ -3,9 +3,9 @@
 #include <cstring>
 #include <raymath.h>
 #include "mouse_movement.h"
-#include "C:/PRJ/RaylibGame/include/rlImGui.h"
-#include "C:/PRJ/RaylibGame/include/imgui.h"
-
+#include "rlImGui.h"
+#include "imgui.h"
+#include "imgui_impl_raylib.h"
 
 /*
 #
@@ -33,6 +33,203 @@ Vector3 GetCameraUp(Camera camera) {
     Vector3 forward = GetCameraForward(camera);  // Get the forward direction
     Vector3 up = Vector3CrossProduct(forward, GetCameraRight(camera));  // Perpendicular vector
     return Vector3Normalize(up);  // Normalize to ensure consistent movement speed
+}
+
+void physicsHandler() {}
+
+void drawGrid()
+{
+    Vector3 strtPos={100,100,0};
+    Vector3 endPos={100,-100,0};
+    for(int x = 0; x < 100; x++)
+    {
+        DrawLine3D(strtPos, endPos, RED);
+        strtPos.z += 1.0f;
+        endPos.z += 1.0f;
+    }
+}
+
+void gameloop()
+{
+    // Sphere
+    Vector3 planePos = {0.0f, -1.0f, 0.0f};  // Initial position of the sphere
+    Vector2 planeSize = {100.0f,100.0f};  // Radius of the sphere
+    Color planeColor = GRAY;
+    DrawPlane(planePos,planeSize,planeColor); // Draw the sphere at its current position
+}
+
+void RenderEditor(float screenWidth, float screenHeight, Camera3D camera) {
+
+    BeginMode3D(camera);
+    ClearBackground(LIGHTGRAY);
+    gameloop();
+    drawGrid();
+    DrawGrid(100,1.5f);
+    EndMode3D();
+}
+
+void DrawResizable3DWindow(float screenWidth, float screenHeight, Camera3D camera) {
+    // Set the window position dynamically (first time) and size
+    static ImVec2 windowPos = ImVec2(100, 100); // Default position
+    static bool firstFrame = true;
+    
+    if (firstFrame) {
+        windowPos = ImVec2(screenWidth / 4, screenHeight / 4); // Starting position of the window
+        firstFrame = false;
+    }
+
+    // Set up the ImGui window with movable and resizable properties
+    ImGui::SetNextWindowPos(windowPos);
+    ImGui::SetNextWindowSize(ImVec2(600, 400), ImGuiCond_FirstUseEver);  // Default size of the window
+    ImGui::Begin("3D Viewport", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+
+    // Get the available region for the 3D window
+    ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+
+    // If we have a non-zero size, render 3D content
+    if (viewportSize.x > 0.0f && viewportSize.y > 0.0f) {
+        // Get the position and size of the ImGui window to render the 3D scene
+        ImVec2 viewportPos = ImGui::GetCursorScreenPos();
+        Rectangle viewportRect = { viewportPos.x, viewportPos.y, viewportSize.x, viewportSize.y };
+
+        // Set the scissor area to match the ImGui window region
+        BeginScissorMode(viewportRect.x, viewportRect.y, viewportRect.width, viewportRect.height);
+
+        // Render the 3D scene in that region
+        RenderEditor(screenWidth, screenHeight, camera);
+
+        // End scissor mode
+        EndScissorMode();
+    }
+
+    // Make the window movable by enabling dragging on the window
+    if (ImGui::IsWindowHovered()) {
+        ImGui::SetWindowPos(windowPos);  // Update the position if dragged
+    }
+
+    // End the ImGui window
+    ImGui::End();
+}
+
+
+
+void ShowMenuBar(ImFont* customFont) {
+    // Use the custom font if it's available
+    if (customFont) {
+        ImGui::PushFont(customFont);
+    }
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.Colors[ImGuiCol_WindowBg].w = 1.0f; // Set the background alpha to 1.0 (fully opaque)
+
+    // Adjust style for the menu bar
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 15)); // Larger frame padding
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(30, 5));  // Space out items
+    ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
+    // Begin the main menu bar
+    if (ImGui::BeginMainMenuBar()) {
+        // File menu
+        if (ImGui::BeginMenu("\uf07c File")) {
+            if (ImGui::MenuItem("\uf15b New Project", "Ctrl+N")) {
+                // Action for creating a new project
+            }
+            if (ImGui::MenuItem("\uf07c Open Project", "Ctrl+O")) {
+                // Action for opening a project
+            }
+            if (ImGui::MenuItem("\uf0c7 Save Project", "Ctrl+S")) {
+                // Action for saving a project
+            }
+            if (ImGui::MenuItem("Exit", "Alt+F4")) {
+                // Action for exiting the application
+            }
+            ImGui::EndMenu();
+        }
+
+        // Edit menu
+        if (ImGui::BeginMenu("Edit")) {
+            if (ImGui::MenuItem("Undo", "Ctrl+Z")) {
+                // Action for undo
+            }
+            if (ImGui::MenuItem("Redo", "Ctrl+Y")) {
+                // Action for redo
+            }
+            if (ImGui::MenuItem("Preferences")) {
+                // Action for opening preferences
+            }
+            ImGui::EndMenu();
+        }
+
+        // Help menu
+        if (ImGui::BeginMenu("Help")) {
+            if (ImGui::MenuItem("\uf059 Documentation", "F1")) {
+                // Action to open documentation
+            }
+            if (ImGui::MenuItem("\uf05a About")) {
+                // Action to show about dialog
+            }
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMainMenuBar();
+    }
+
+    // Revert style changes
+    ImGui::PopStyleVar(2);
+    const float menuWidth = 400.0f;
+    const float menuHeight = GetScreenHeight() -50.0f;
+    const float menuPos = 45.0f;
+    ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
+    // Left Menu
+    ImGui::SetNextWindowPos(ImVec2(0, menuPos)); // Position: Top-left corner below the main menu bar
+    ImGui::SetNextWindowSize(ImVec2(menuWidth, menuHeight)); // Size: 400px wide, screen height - 50px
+    ImGui::Begin("Left Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+    ImGui::Text("Left Side Menu");
+    ImGui::Separator();
+    // Add content for the left menu here
+    ImGui::Text("Option 1");
+    ImGui::Text("Option 2");
+    ImGui::Text("Option 3");
+    ImGui::End();
+    ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
+    // Right Menu
+    ImGui::SetNextWindowPos(ImVec2(GetScreenWidth() - menuWidth, menuPos)); // Position: Top-right corner below the main menu bar
+    ImGui::SetNextWindowSize(ImVec2(menuWidth, menuHeight)); // Size: 400px wide, screen height - 50px
+    ImGui::Begin("Right Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+    ImGui::Text("Right Side Menu");
+    ImGui::Separator();
+    // Add content for the right menu here
+    ImGui::Text("Option A");
+    ImGui::Text("Option B");
+    ImGui::Text("Option C");
+    ImGui::End();
+    ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
+    // Bottom Menu
+    ImGui::SetNextWindowPos(ImVec2(menuWidth, 750.0f)); // Position: Top-right corner below the main menu bar
+    ImGui::SetNextWindowSize(ImVec2(GetScreenWidth() - 2.0f*menuWidth, menuPos + 330.0f)); // Size: 400px wide, screen height - 50px
+    ImGui::Begin("Bottom Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+    ImGui::Text("Bottom Menu");
+    ImGui::Separator();
+    // Add content for the right menu here
+    ImGui::Text("Option A");
+    ImGui::Text("Option B");
+    ImGui::Text("Option C");
+    ImGui::End();
+
+    // Revert to default font if custom font was used
+    if (customFont) {
+        ImGui::PopFont();
+    }
+}
+
+ImFont* customFont = nullptr;
+
+void InitializeFonts() {
+    ImGuiIO& io = ImGui::GetIO();
+    ImFont* customFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("../resources/fonts/aristotelica-icons-regular.ttf", 20.0f);
+                if (customFont == nullptr) {
+        TraceLog(LOG_ERROR, "Failed to load font!");
+    } else {
+        rlImGuiReloadFonts(); // Reload fonts after adding a new one
+    }
 }
 
 void userInputHandler(bool &menuFLag, bool &refMenu, Camera3D &cam, float &mveAmount) 
@@ -79,28 +276,6 @@ void userInputHandler(bool &menuFLag, bool &refMenu, Camera3D &cam, float &mveAm
 
 }
 
-void physicsHandler() {}
-
-void drawGrid()
-{
-    Vector3 strtPos={100,100,0};
-    Vector3 endPos={100,-100,0};
-    for(int x = 0; x < 100; x++)
-    {
-        DrawLine3D(strtPos, endPos, RED);
-        strtPos.z += 1.0f;
-        endPos.z += 1.0f;
-    }
-}
-
-void gameloop()
-{
-    // Sphere
-    Vector3 planePos = {0.0f, -1.0f, 0.0f};  // Initial position of the sphere
-    Vector2 planeSize = {100.0f,100.0f};  // Radius of the sphere
-    Color planeColor = GRAY;
-    DrawPlane(planePos,planeSize,planeColor); // Draw the sphere at its current position
-}
 int main(void) {
     int screenWidth = 800;
     int screenHeight = 450;
@@ -132,6 +307,10 @@ int main(void) {
     Texture2D LRMenuBack = LoadTexture("../resources/leftMenuBack.png");
     Texture2D botMenuBack = LoadTexture("../resources/bottomMenu.png");
     Image logoImage = LoadImage("../resources/neeflogo/neeflogo3.png");
+
+    
+
+
     ImageResize(&logoImage,logoImage.width/70,logoImage.height/70);
     Texture2D logoTexture = LoadTextureFromImage(logoImage);
     Texture2D frames[FRAME_COUNT];
@@ -151,6 +330,8 @@ int main(void) {
 
     //init ImgGUI
     rlImGuiSetup(true);
+    InitializeFonts(); // Load the custom font
+    
     bool show_demo_window = true;
     int currentFrame = 0;
     float frameTimer = 0.0f;
@@ -243,9 +424,10 @@ int main(void) {
             EndMode3D();
             EndScissorMode();
             //Imgui
-        
+            ImGui_ImplRaylib_Init();
+            ImGui_ImplRaylib_NewFrame();
             rlImGuiBegin();
-            ImGui::ShowDemoWindow(&show_demo_window);
+            ShowMenuBar(customFont);
             rlImGuiEnd();
         } else {
             ClearBackground(BLANK);  // Transparent background initially
