@@ -6,7 +6,6 @@
 #include "rlImGui.h"
 #include "imgui.h"
 #include "imgui_impl_raylib.h"
-
 /*
 #
     g++ main.cpp mouse_movement.cpp -o main -L"C:/msys64/ucrt64/lib" -I"C:/msys64/ucrt64/include" -lraylib -lopengl32 -lgdi32 -lwinmm
@@ -15,6 +14,7 @@
 
 #define FRAME_COUNT 28  // Total number of frames
 #define FRAME_DELAY 0.04f // Delay per frame in seconds
+
 
 Vector3 GetCameraForward(Camera camera) {
     Vector3 forward = Vector3Subtract(camera.target, camera.position);
@@ -37,83 +37,12 @@ Vector3 GetCameraUp(Camera camera) {
 
 void physicsHandler() {}
 
-void drawGrid()
-{
-    Vector3 strtPos={100,100,0};
-    Vector3 endPos={100,-100,0};
-    for(int x = 0; x < 100; x++)
-    {
-        DrawLine3D(strtPos, endPos, RED);
-        strtPos.z += 1.0f;
-        endPos.z += 1.0f;
-    }
-}
 
 void gameloop()
 {
-    // Sphere
-    Vector3 planePos = {0.0f, -1.0f, 0.0f};  // Initial position of the sphere
-    Vector2 planeSize = {100.0f,100.0f};  // Radius of the sphere
-    Color planeColor = GRAY;
-    DrawPlane(planePos,planeSize,planeColor); // Draw the sphere at its current position
 }
 
-void RenderEditor(float screenWidth, float screenHeight, Camera3D camera) {
-
-    BeginMode3D(camera);
-    ClearBackground(LIGHTGRAY);
-    gameloop();
-    drawGrid();
-    DrawGrid(100,1.5f);
-    EndMode3D();
-}
-
-void DrawResizable3DWindow(float screenWidth, float screenHeight, Camera3D camera) {
-    // Set the window position dynamically (first time) and size
-    static ImVec2 windowPos = ImVec2(100, 100); // Default position
-    static bool firstFrame = true;
-    
-    if (firstFrame) {
-        windowPos = ImVec2(screenWidth / 4, screenHeight / 4); // Starting position of the window
-        firstFrame = false;
-    }
-
-    // Set up the ImGui window with movable and resizable properties
-    ImGui::SetNextWindowPos(windowPos);
-    ImGui::SetNextWindowSize(ImVec2(600, 400), ImGuiCond_FirstUseEver);  // Default size of the window
-    ImGui::Begin("3D Viewport", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-
-    // Get the available region for the 3D window
-    ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-
-    // If we have a non-zero size, render 3D content
-    if (viewportSize.x > 0.0f && viewportSize.y > 0.0f) {
-        // Get the position and size of the ImGui window to render the 3D scene
-        ImVec2 viewportPos = ImGui::GetCursorScreenPos();
-        Rectangle viewportRect = { viewportPos.x, viewportPos.y, viewportSize.x, viewportSize.y };
-
-        // Set the scissor area to match the ImGui window region
-        BeginScissorMode(viewportRect.x, viewportRect.y, viewportRect.width, viewportRect.height);
-
-        // Render the 3D scene in that region
-        RenderEditor(screenWidth, screenHeight, camera);
-
-        // End scissor mode
-        EndScissorMode();
-    }
-
-    // Make the window movable by enabling dragging on the window
-    if (ImGui::IsWindowHovered()) {
-        ImGui::SetWindowPos(windowPos);  // Update the position if dragged
-    }
-
-    // End the ImGui window
-    ImGui::End();
-}
-
-
-
-void ShowMenuBar(ImFont* customFont) {
+void ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos) {
     // Use the custom font if it's available
     if (customFont) {
         ImGui::PushFont(customFont);
@@ -160,15 +89,48 @@ void ShowMenuBar(ImFont* customFont) {
 
         // Help menu
         if (ImGui::BeginMenu("Help")) {
-            if (ImGui::MenuItem("\uf059 Documentation", "F1")) {
-                // Action to open documentation
+            if (ImGui::MenuItem("\uf059 Documentation", "F1")) 
+            {
+                system("start https://neefengine.com/docs");
             }
-            if (ImGui::MenuItem("\uf05a About")) {
+            if (ImGui::MenuItem("\uf05a About")) 
+            {
                 // Action to show about dialog
             }
             ImGui::EndMenu();
         }
 
+        // Start menu
+        if (ImGui::BeginMenu("Start")) 
+        {
+            if (ImGui::MenuItem("Run Game Windowed", "F1")) {
+                // Action to open documentation
+            }
+            if (ImGui::MenuItem("Run Fullscreen")) {
+                // Action to show about dialog
+            }
+            ImGui::EndMenu();
+        }
+
+        // Stop menu
+        if (ImGui::BeginMenu("Stop")) 
+        {
+            if (ImGui::MenuItem("\uf059 Stop", "F1")) 
+            {
+                // Action to stop code
+            }
+            ImGui::EndMenu();
+        }
+
+        // Windows menu
+        if (ImGui::BeginMenu("Windows")) 
+        {
+            if (ImGui::MenuItem("\uf059 Stop", "F1")) 
+            {
+                // Action to stop code
+            }
+            ImGui::EndMenu();
+        }
         ImGui::EndMainMenuBar();
     }
 
@@ -176,42 +138,89 @@ void ShowMenuBar(ImFont* customFont) {
     ImGui::PopStyleVar(2);
     const float menuWidth = 400.0f;
     const float menuHeight = GetScreenHeight() -50.0f;
-    const float menuPos = 45.0f;
+    const float menuPos = 42.0f;
     ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
     // Left Menu
     ImGui::SetNextWindowPos(ImVec2(0, menuPos)); // Position: Top-left corner below the main menu bar
     ImGui::SetNextWindowSize(ImVec2(menuWidth, menuHeight)); // Size: 400px wide, screen height - 50px
-    ImGui::Begin("Left Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
-    ImGui::Text("Left Side Menu");
+    ImGui::SetWindowFontScale(10.0f); // Scale text in the current window
+    ImGui::Begin("Scriptor", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration);
+    ImGui::Text("Scriptor");
     ImGui::Separator();
     // Add content for the left menu here
+    if(ImGui::BeginTabBar("Scriptor"))
+    {
+        if(ImGui::TabItemButton("Fullscreen"))
+        {
+
+        }
+        if(ImGui::TabItemButton("New Block Script"))
+        {
+
+        }
+        if(ImGui::TabItemButton("Edit Code"))
+        {
+
+        }
+    }
     ImGui::Text("Option 1");
     ImGui::Text("Option 2");
     ImGui::Text("Option 3");
+    
+    ImGui::EndTabBar();
     ImGui::End();
     ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
     // Right Menu
     ImGui::SetNextWindowPos(ImVec2(GetScreenWidth() - menuWidth, menuPos)); // Position: Top-right corner below the main menu bar
     ImGui::SetNextWindowSize(ImVec2(menuWidth, menuHeight)); // Size: 400px wide, screen height - 50px
-    ImGui::Begin("Right Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin("Right Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration);
     ImGui::Text("Right Side Menu");
     ImGui::Separator();
-    // Add content for the right menu here
-    ImGui::Text("Option A");
-    ImGui::Text("Option B");
-    ImGui::Text("Option C");
+    //Cordinates
+    if(ImGui::BeginTabBar("Object Inspector"))
+    {
+        if(ImGui::TabItemButton("Properties"))
+        {
+
+        }
+        if(ImGui::TabItemButton("Shaders and Materials"))
+        {
+
+        }
+        if(ImGui::TabItemButton("Animations"))
+        {
+
+        }
+    }
+    ImGui::EndTabBar();
+    ImGui::Text("Vector Space Position and Rotation");
+    char coordinates[50];
+    sprintf(coordinates, "X: %.2f, Y: %.2f, Z: %.2f", camMain.position.x, camMain.position.y, camMain.position.z);
+    char target[50];
+    sprintf(target, "X: %.2f, Y: %.2f, Z: %.2f", camMain.target.x, camMain.target.y, camMain.target.z);
+    ImGui::Text(coordinates);
+    ImGui::Text(target);
+    ImGui::Separator();
+    ImGui::Text("Current Value: %.2f", pos.x);
+    ImGui::SliderFloat("X:", &pos.x, -100.0f, 100.0f, "Value: %.2f");
+    ImGui::Text("Current Value: %.2f", pos.y);
+    ImGui::SliderFloat("Y:", &pos.y, -100.0f, 100.0f, "Value: %.2f");
+    ImGui::Text("Current Value: %.2f", pos.z);
+    ImGui::SliderFloat("Z:", &pos.z, -100.0f, 100.0f, "Value: %.2f");
+    ImGui::Separator();
     ImGui::End();
     ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
     // Bottom Menu
     ImGui::SetNextWindowPos(ImVec2(menuWidth, 750.0f)); // Position: Top-right corner below the main menu bar
     ImGui::SetNextWindowSize(ImVec2(GetScreenWidth() - 2.0f*menuWidth, menuPos + 330.0f)); // Size: 400px wide, screen height - 50px
-    ImGui::Begin("Bottom Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
-    ImGui::Text("Bottom Menu");
+    ImGui::Begin("File Manager", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration);
+    ImGui::Text("File Manager");
     ImGui::Separator();
-    // Add content for the right menu here
+    // Add content for the Bottom menu here
     ImGui::Text("Option A");
     ImGui::Text("Option B");
     ImGui::Text("Option C");
+    
     ImGui::End();
 
     // Revert to default font if custom font was used
@@ -220,16 +229,16 @@ void ShowMenuBar(ImFont* customFont) {
     }
 }
 
-ImFont* customFont = nullptr;
 
-void InitializeFonts() {
+void InitializeFonts(ImFont* customFont) {
     ImGuiIO& io = ImGui::GetIO();
-    ImFont* customFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("../resources/fonts/aristotelica-icons-regular.ttf", 20.0f);
+    customFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("../resources/fonts/aristotelica-icons-regular.ttf", 20.0f);
                 if (customFont == nullptr) {
         TraceLog(LOG_ERROR, "Failed to load font!");
     } else {
         rlImGuiReloadFonts(); // Reload fonts after adding a new one
     }
+    
 }
 
 void userInputHandler(bool &menuFLag, bool &refMenu, Camera3D &cam, float &mveAmount) 
@@ -276,14 +285,19 @@ void userInputHandler(bool &menuFLag, bool &refMenu, Camera3D &cam, float &mveAm
 
 }
 
+#define MAX_COLUMNS 20
+
 int main(void) {
     int screenWidth = 800;
     int screenHeight = 450;
 
     // Set window flags initially for transparent window
-    SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_TRANSPARENT | FLAG_VSYNC_HINT); 
-    InitWindow(screenWidth, screenHeight, "Neef Engine V-0.0a");
-
+    SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_TRANSPARENT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE); 
+    InitWindow(screenWidth, screenHeight, "Neef Engine V-0.0c");
+    SetWindowMinSize(800,450);
+    Image icon = LoadImage("../resources/neeflogo/icon.png");
+    SetWindowIcon(icon);
+    SetExitKey(NULL);
     // Camera setup
     Camera3D camMain = {0};
     camMain.position = (Vector3){0.0f, 10.0f, 10.0f}; // Camera position
@@ -297,7 +311,18 @@ int main(void) {
     // Sensitivity for camera rotation
     float sensitivity = 0.1f;
     //DisableCursor(); // Lock cursor for camera control
+    //
+    float heights[MAX_COLUMNS] = { 0 };
+    Vector3 positions[MAX_COLUMNS] = { 0 };
+    Color colors[MAX_COLUMNS] = { 0 };
 
+    for (int i = 0; i < MAX_COLUMNS; i++)
+    {
+        heights[i] = (float)GetRandomValue(1, 12);
+        positions[i] = (Vector3){ (float)GetRandomValue(-15, 15), heights[i]/2.0f, (float)GetRandomValue(-15, 15) };
+        colors[i] = (Color){ GetRandomValue(20, 255), GetRandomValue(10, 55), 30, 255 };
+    }
+    //
     // Physics
     float gravity = -9.8f; // Gravity force (downwards)
     float velocity = 0.0f; // Initial velocity
@@ -307,10 +332,9 @@ int main(void) {
     Texture2D LRMenuBack = LoadTexture("../resources/leftMenuBack.png");
     Texture2D botMenuBack = LoadTexture("../resources/bottomMenu.png");
     Image logoImage = LoadImage("../resources/neeflogo/neeflogo3.png");
-
     
-
-
+    Model model = LoadModel("./resources/AllAnimalsnotOne1Point.obj");
+    
     ImageResize(&logoImage,logoImage.width/70,logoImage.height/70);
     Texture2D logoTexture = LoadTextureFromImage(logoImage);
     Texture2D frames[FRAME_COUNT];
@@ -324,13 +348,10 @@ int main(void) {
         }
     }
 
-    //Model model = LoadModel("../resources/models/Low-Poly-Racing-Car.obj");
-    //Model car2 = LoadModel("../resources/models/game_house_environement.obj");
-    Vector3 modelPosition = { 0.0f, 0.0f, 0.0f }; // Replace with desired position
-
     //init ImgGUI
     rlImGuiSetup(true);
-    InitializeFonts(); // Load the custom font
+    ImFont* customFont = nullptr;
+    //InitializeFonts(customFont); // Load the custom font
     
     bool show_demo_window = true;
     int currentFrame = 0;
@@ -341,6 +362,9 @@ int main(void) {
     bool inGame = false;
     SetTargetFPS(60);
     bool mouseMovementEnabled = false;
+
+    //temp
+    Vector3 posx = {0,0,0};
     while (!WindowShouldClose()) {
 
 
@@ -392,7 +416,7 @@ int main(void) {
             } else {
                 ShowCursor(); // Show the system mouse cursor
             }
-            ClearBackground(SKYBLUE);
+            ClearBackground(DARKGRAY);
             ClearWindowState(FLAG_WINDOW_UNDECORATED);
             
             screenHeight = GetScreenHeight();
@@ -403,23 +427,25 @@ int main(void) {
             DrawTexture(LRMenuBack,1520,0,WHITE);
             DrawTexture(botMenuBack,400,750,WHITE);
             DrawTexture(topMenuBack,0,0,WHITE);
-            //Cordinates
-            char coordinates[50];
-            sprintf(coordinates, "X: %.2f, Y: %.2f, Z: %.2f", camMain.position.x, camMain.position.y, camMain.position.z);
-            DrawText(coordinates,1540,50,20,DARKGRAY);
-
-            char target[50];
-            sprintf(target, "X: %.2f, Y: %.2f, Z: %.2f", camMain.target.x, camMain.target.y, camMain.target.z);
-            DrawText(target,1540,75,20,DARKGRAY);
+            
             DrawTexture(logoTexture, 5, 5, WHITE);
             DrawFPS(1540,95);
             BeginScissorMode(400,30,1120,720);
-
             BeginMode3D(camMain);
-                gameloop();
-                drawGrid();
-                DrawGrid(100,1.5f);
-                //DrawModel(model, modelPosition, 1.0f, ORANGE); // Adjust scale if needed
+                //DrawPoint3D()
+                //gameloop();
+                DrawGrid(1000,1.0f);
+                DrawPlane((Vector3){ 0.0f, 0.0f, 0.0f }, (Vector2){ 32.0f, 32.0f }, LIGHTGRAY); // Draw ground
+                DrawCube((Vector3){ -16.0f, 2.5f, 0.0f }, 1.0f, 5.0f, 32.0f, BLUE);     // Draw a blue wall
+                DrawCube((Vector3){ 16.0f, 2.5f, 0.0f }, 1.0f, 5.0f, 32.0f, LIME);      // Draw a green wall
+                DrawCube((Vector3){ 0.0f, 2.5f, 16.0f }, 32.0f, 5.0f, 1.0f, GOLD);      // Draw a yellow wall
+
+                for (int i = 0; i < MAX_COLUMNS; i++)
+                {
+                    DrawCube(positions[i], 2.0f, heights[i], 2.0f, colors[i]);
+                    DrawCubeWires(positions[i], 2.0f, heights[i], 2.0f, MAROON);
+                }
+                //DrawModel(model, {0,0,0}, 1.0f, ORANGE); // Adjust scale if needed
                 //DrawModel(car2,modelPosition,10.0f,RED);
             EndMode3D();
             EndScissorMode();
@@ -427,7 +453,7 @@ int main(void) {
             ImGui_ImplRaylib_Init();
             ImGui_ImplRaylib_NewFrame();
             rlImGuiBegin();
-            ShowMenuBar(customFont);
+            ShowMenuBar(customFont, camMain, posx);
             rlImGuiEnd();
         } else {
             ClearBackground(BLANK);  // Transparent background initially
