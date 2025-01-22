@@ -6,6 +6,11 @@
 #include "rlImGui.h"
 #include "imgui.h"
 #include "imgui_impl_raylib.h"
+#include "gameobject.h"
+#include "Scene.h"
+#include "json.hpp"
+using json = nlohmann::json; // Alias the namespace for easier usage
+
 /*
 #
     g++ main.cpp mouse_movement.cpp -o main -L"C:/msys64/ucrt64/lib" -I"C:/msys64/ucrt64/include" -lraylib -lopengl32 -lgdi32 -lwinmm
@@ -42,7 +47,7 @@ void gameloop()
 {
 }
 
-void ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos) {
+void ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot) {
     // Use the custom font if it's available
     if (customFont) {
         ImGui::PushFont(customFont);
@@ -125,7 +130,7 @@ void ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos) {
         // Windows menu
         if (ImGui::BeginMenu("Windows")) 
         {
-            if (ImGui::MenuItem("\uf059 Stop", "F1")) 
+            if (ImGui::MenuItem("\uf059 None", "F1")) 
             {
                 // Action to stop code
             }
@@ -136,6 +141,11 @@ void ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos) {
 
     // Revert style changes
     ImGui::PopStyleVar(2);
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.2f, 0.6f, 0.8f));      // Button color
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.3f, 0.7f, 0.9f)); // Hovered color
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.1f, 0.5f, 1.0f));  // Active color
+
     const float menuWidth = 400.0f;
     const float menuHeight = GetScreenHeight() -50.0f;
     const float menuPos = 42.0f;
@@ -143,22 +153,22 @@ void ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos) {
     // Left Menu
     ImGui::SetNextWindowPos(ImVec2(0, menuPos)); // Position: Top-left corner below the main menu bar
     ImGui::SetNextWindowSize(ImVec2(menuWidth, menuHeight)); // Size: 400px wide, screen height - 50px
-    ImGui::SetWindowFontScale(10.0f); // Scale text in the current window
-    ImGui::Begin("Scriptor", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration);
-    ImGui::Text("Scriptor");
+    //ImGui::SetWindowFontScale(10.0f); // Scale text in the current window
+    ImGui::Begin("Objects In Scene", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration);
+    ImGui::Text("Objects In Scene");
     ImGui::Separator();
     // Add content for the left menu here
-    if(ImGui::BeginTabBar("Scriptor"))
+    if(ImGui::BeginTabBar("Objects"))
     {
-        if(ImGui::TabItemButton("Fullscreen"))
+        if(ImGui::TabItemButton("Add"))
+        {
+            
+        }
+        if(ImGui::TabItemButton("Remove"))
         {
 
         }
-        if(ImGui::TabItemButton("New Block Script"))
-        {
-
-        }
-        if(ImGui::TabItemButton("Edit Code"))
+        if(ImGui::TabItemButton("New Scene"))
         {
 
         }
@@ -201,12 +211,21 @@ void ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos) {
     ImGui::Text(coordinates);
     ImGui::Text(target);
     ImGui::Separator();
+    ImGui::Text("Object Transform");
     ImGui::Text("Current Value: %.2f", pos.x);
     ImGui::SliderFloat("X:", &pos.x, -100.0f, 100.0f, "Value: %.2f");
     ImGui::Text("Current Value: %.2f", pos.y);
     ImGui::SliderFloat("Y:", &pos.y, -100.0f, 100.0f, "Value: %.2f");
     ImGui::Text("Current Value: %.2f", pos.z);
     ImGui::SliderFloat("Z:", &pos.z, -100.0f, 100.0f, "Value: %.2f");
+    ImGui::Separator();
+    ImGui::Text("Object Rotation");
+    ImGui::Text("Current Value: %.2f", rot.x);
+    ImGui::SliderFloat("Pitch:", &rot.x, -360.0f, 360.0f, "Value: %.2f");
+    ImGui::Text("Current Value: %.2f", rot.y);
+    ImGui::SliderFloat("Yaw:", &rot.y, -360.0f, 360.0f, "Value: %.2f");
+    ImGui::Text("Current Value: %.2f", rot.z);
+    ImGui::SliderFloat("Roll:", &rot.z, -360.0f, 360.0f, "Value: %.2f");
     ImGui::Separator();
     ImGui::End();
     ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
@@ -227,6 +246,7 @@ void ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos) {
     if (customFont) {
         ImGui::PopFont();
     }
+    ImGui::PopStyleColor(3);
 }
 
 
@@ -293,7 +313,7 @@ int main(void) {
 
     // Set window flags initially for transparent window
     SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_TRANSPARENT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE); 
-    InitWindow(screenWidth, screenHeight, "Neef Engine V-0.0c");
+    InitWindow(screenWidth, screenHeight, "Neef Engine V-0.0e");
     SetWindowMinSize(800,450);
     Image icon = LoadImage("../resources/neeflogo/icon.png");
     SetWindowIcon(icon);
@@ -320,7 +340,7 @@ int main(void) {
     {
         heights[i] = (float)GetRandomValue(1, 12);
         positions[i] = (Vector3){ (float)GetRandomValue(-15, 15), heights[i]/2.0f, (float)GetRandomValue(-15, 15) };
-        colors[i] = (Color){ GetRandomValue(20, 255), GetRandomValue(10, 55), 30, 255 };
+        //colors[i] = BLACK;
     }
     //
     // Physics
@@ -332,9 +352,25 @@ int main(void) {
     Texture2D LRMenuBack = LoadTexture("../resources/leftMenuBack.png");
     Texture2D botMenuBack = LoadTexture("../resources/bottomMenu.png");
     Image logoImage = LoadImage("../resources/neeflogo/neeflogo3.png");
-    
-    Model model = LoadModel("./resources/AllAnimalsnotOne1Point.obj");
-    
+    //
+    Scene scene("Game");
+
+    // Create some GameObjects
+    GameObject* obj1 = new GameObject("resources/model1.obj", "resources/texture1.png", "");
+    GameObject* obj2 = new GameObject("resources/model2.obj", "resources/texture2.png", "");
+
+    // Add objects to the scene
+    scene.AddGameObject(obj1);
+    scene.AddGameObject(obj2);
+    //
+
+    float pitch = 0.0f;
+    float roll = 0.0f;
+    float yaw = 0.0f;
+
+    Vector3 Cuberotation = {0.0f,0.0f,0.0f}; // x: pitch, y: roll, z: yaw
+
+    //
     ImageResize(&logoImage,logoImage.width/70,logoImage.height/70);
     Texture2D logoTexture = LoadTextureFromImage(logoImage);
     Texture2D frames[FRAME_COUNT];
@@ -431,29 +467,21 @@ int main(void) {
             DrawTexture(logoTexture, 5, 5, WHITE);
             DrawFPS(1540,95);
             BeginScissorMode(400,30,1120,720);
-            BeginMode3D(camMain);
-                //DrawPoint3D()
-                //gameloop();
-                DrawGrid(1000,1.0f);
-                DrawPlane((Vector3){ 0.0f, 0.0f, 0.0f }, (Vector2){ 32.0f, 32.0f }, LIGHTGRAY); // Draw ground
-                DrawCube((Vector3){ -16.0f, 2.5f, 0.0f }, 1.0f, 5.0f, 32.0f, BLUE);     // Draw a blue wall
-                DrawCube((Vector3){ 16.0f, 2.5f, 0.0f }, 1.0f, 5.0f, 32.0f, LIME);      // Draw a green wall
-                DrawCube((Vector3){ 0.0f, 2.5f, 16.0f }, 32.0f, 5.0f, 1.0f, GOLD);      // Draw a yellow wall
+            //apply transformations
 
-                for (int i = 0; i < MAX_COLUMNS; i++)
-                {
-                    DrawCube(positions[i], 2.0f, heights[i], 2.0f, colors[i]);
-                    DrawCubeWires(positions[i], 2.0f, heights[i], 2.0f, MAROON);
-                }
-                //DrawModel(model, {0,0,0}, 1.0f, ORANGE); // Adjust scale if needed
-                //DrawModel(car2,modelPosition,10.0f,RED);
+
+            BeginMode3D(camMain);
+                scene.Update();
+                scene.Draw();
             EndMode3D();
+
+            
             EndScissorMode();
             //Imgui
             ImGui_ImplRaylib_Init();
             ImGui_ImplRaylib_NewFrame();
             rlImGuiBegin();
-            ShowMenuBar(customFont, camMain, posx);
+            ShowMenuBar(customFont, camMain, posx, Cuberotation);
             rlImGuiEnd();
         } else {
             ClearBackground(BLANK);  // Transparent background initially
@@ -490,6 +518,7 @@ int main(void) {
     for (int i = 0; i < FRAME_COUNT; i++) {
         UnloadTexture(frames[i]);
     }
+    scene.ClearScene();
     CloseWindow();
 
     return 0;
