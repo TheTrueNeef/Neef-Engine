@@ -66,7 +66,9 @@ void Scene::Update() {
 }
 
 // Draw all GameObjects
-void Scene::Draw() {
+void Scene::Draw() 
+{
+    DrawGrid(1000,1.0f);
     for (auto* gameObject : gameObjects) {
         gameObject->Draw();
     }

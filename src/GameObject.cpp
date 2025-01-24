@@ -16,14 +16,26 @@ GameObject::GameObject(const std::string& modelPath, const std::string& textureP
     position = {0.0f, 0.0f, 0.0f};
     rotation = {0.0f, 0.0f, 0.0f};
     scale = 1.0f;
-
     // Load model and texture
-    model = LoadModelFromMesh(GenMeshCube(1.5f, 1.5f, 1.5f));
+    model = LoadModel("../resources/Rv.obj");
     texture = LoadTexture(texturePath.c_str());
 
     // Associate texture with model
     model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+    std::cout << model.materialCount;
+    for (int i = 0; i < model.materialCount; i++) {
+    Material *material = &model.materials[i];
 
+    // Check and assign diffuse map
+    if (material->maps[MATERIAL_MAP_DIFFUSE].texture.id == 0) {
+        material->maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture("../resources/textures/gmc_exterior_dif.png");
+    }
+
+    // Check and assign specular map
+    if (material->maps[MATERIAL_MAP_SPECULAR].texture.id == 0) {
+        material->maps[MATERIAL_MAP_SPECULAR].texture = LoadTexture("../resources/textures/gmc_exterior_spc_clr.jpg");
+    }
+}
     // Load JSON data
     std::ifstream file(jsonPath);
     if (file.is_open()) {
@@ -51,9 +63,9 @@ GameObject::~GameObject() {
 }
 
 // Setters
-void GameObject::SetPosition(float x, float y, float z) {
-    position = {x, y, z};
-    jsonData["position"] = {{"x", x}, {"y", y}, {"z", z}};
+void GameObject::SetPosition(Vector3 pos) {
+    position = {pos.x, pos.y, pos.z};
+    jsonData["position"] = {{"x", pos.x}, {"y", pos.y}, {"z", pos.z}};
 }
 
 void GameObject::SetRotation(Vector3 rot) {
@@ -83,9 +95,12 @@ float GameObject::GetScale() const {
 // Update method
 void GameObject::Update() {
     // Apply physics and user input here if needed
+    
 }
 
 // Draw method
 void GameObject::Draw() {
-    DrawModel(model, position, scale, RED);
+    // Scale bounding box based on the object's scale
+    //Draw Model
+    DrawModel(model, position, scale, WHITE);
 }

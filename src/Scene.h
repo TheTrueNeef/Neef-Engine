@@ -15,6 +15,8 @@ public:
     Scene(const std::string& name);
     ~Scene();
 
+    GameObject* selected = nullptr;
+
     void AddGameObject(GameObject* gameObject);
     void RemoveGameObject(GameObject* gameObject);
     void ClearScene();

@@ -19,12 +19,13 @@ private:
 public:
     json jsonData;          // JSON object to store properties
     std::string jsonFilename; // JSON filename for saving/loading
+
     // Constructor and Destructor
     GameObject(const std::string& modelPath, const std::string& texturePath, const std::string& jsonFilename);
     ~GameObject();
 
     // Setters
-    void SetPosition(float x, float y, float z);
+    void SetPosition(Vector3 pos);
     void SetRotation(Vector3 rot);
     void SetScale(float s);
 
