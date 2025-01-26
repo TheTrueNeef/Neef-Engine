@@ -23,7 +23,7 @@ using json = nlohmann::json; // Alias the namespace for easier usage
 
 void InitializeFonts(ImFont* customFont) {
     ImGuiIO& io = ImGui::GetIO();
-    customFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("resources/fonts/aristotelica-icons-regular.ttf", 20.0f);
+    customFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("../resources/fonts/aristotelica-icons-regular.ttf", 20.0f);
                 if (customFont == nullptr) {
         TraceLog(LOG_ERROR, "Failed to load font!");
     } else {
@@ -64,7 +64,7 @@ int main(void) {
     SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_TRANSPARENT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT); 
     InitWindow(screenWidth, screenHeight, "Neef Engine V-0.0f");
     SetWindowMinSize(800,450);
-    Image icon = LoadImage("resources/neeflogo/icon.png");
+    Image icon = LoadImage("../resources/neeflogo/icon.png");
     SetWindowIcon(icon);
     SetExitKey(KEY_B && KEY_A);
     // Camera setup
@@ -85,10 +85,10 @@ int main(void) {
     float velocity = 0.0f; // Initial velocity
     float groundLevel = -5.0f; // Ground level (Y position of the floor)
 
-    Texture2D topMenuBack = LoadTexture("resources/topMenu.png");
-    Texture2D LRMenuBack = LoadTexture("resources/leftMenuBack.png");
-    Texture2D botMenuBack = LoadTexture("resources/bottomMenu.png");
-    Image logoImage = LoadImage("resources/neeflogo/neeflogo3.png");
+    Texture2D topMenuBack = LoadTexture("../resources/topMenu.png");
+    Texture2D LRMenuBack = LoadTexture("../resources/leftMenuBack.png");
+    Texture2D botMenuBack = LoadTexture("../resources/bottomMenu.png");
+    Image logoImage = LoadImage("../resources/neeflogo/neeflogo3.png");
     //
     Scene scene("TemplateScene");
     MenuBar guiMENU;
@@ -106,7 +106,7 @@ int main(void) {
     Texture2D frames[FRAME_COUNT];
     for (int i = 0; i < FRAME_COUNT; i++) {
         char fileName[64];
-        snprintf(fileName, sizeof(fileName), "resources/loading/frame_%02d_delay-0.04s.png", i); // Updated file naming
+        snprintf(fileName, sizeof(fileName), "../resources/loading/frame_%02d_delay-0.04s.png", i); // Updated file naming
         frames[i] = LoadTexture(fileName);
 
         if (frames[i].id == 0) {

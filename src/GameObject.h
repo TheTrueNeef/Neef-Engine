@@ -17,7 +17,7 @@ private:
 public:
     json jsonData;          // JSON object to store properties
     std::string jsonFilename; // JSON filename for saving/loading
-    bool isSelected;
+    bool isSelected{false};
     int CUBE_ID{0}, MODEL_ID{1};
     // Constructor and Destructor
     GameObject(int modelID, const std::string& modelPath, const std::string& texturePath, const std::string& jsonFilename);
@@ -36,6 +36,8 @@ public:
     // Update and Draw
     void Update();
     void Draw();
+
+    void clear();
 };
 
 #endif // GAMEOBJECT_H

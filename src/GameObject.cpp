@@ -17,7 +17,7 @@ GameObject::GameObject(int modelID, const std::string& modelPath, const std::str
     rotation = {0.0f, 0.0f, 0.0f};
     scale = 1.0f;
     // Load model and texture
-    model = LoadModel("../resources/Rv.obj");
+    //model = LoadModel("../resources/Rv.obj");
     texture = LoadTexture(texturePath.c_str());
     // 0 Cube, 1 Sphere, 2 Model
     switch (modelID)
@@ -26,7 +26,14 @@ GameObject::GameObject(int modelID, const std::string& modelPath, const std::str
         model = LoadModelFromMesh(GenMeshCube(1.0f,1.0f,1.0f));
         break;
     case 1:
-        model = LoadModelFromMesh(GenMeshSphere(1.0f,1.0f,1.0f));
+        try
+        {
+            model = LoadModelFromMesh(GenMeshSphere(1.0f,1.0f,1.0f));
+        }        
+        catch(_exception e)
+        {
+            model = LoadModelFromMesh(GenMeshCube(1.0f,1.0f,1.0f));
+        }
         break;
     case 2:
         model = LoadModel(modelPath.c_str());
@@ -46,23 +53,23 @@ GameObject::GameObject(int modelID, const std::string& modelPath, const std::str
     }
 
     // Load JSON data
-    std::ifstream file(jsonPath);
-    if (file.is_open()) {
-        try {
-            file >> jsonData;
-        } catch (const std::exception& e) {
-            std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
-            jsonData = {}; // Default empty JSON
-        }
-        file.close();
-    } else {
-        std::cerr << "JSON file not found: " << jsonPath << ". Using default values.\n";
-        jsonData = {
-            {"position", {{"x", 0.0f}, {"y", 0.0f}, {"z", 0.0f}}},
-            {"rotation", {{"x", 0.0f}, {"y", 0.0f}, {"z", 0.0f}}},
-            {"scale", 1.0f}
-        };
-    }
+    // std::ifstream file(jsonPath);
+    // if (file.is_open()) {
+    //     try {
+    //         file >> jsonData;
+    //     } catch (const std::exception& e) {
+    //         std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
+    //         jsonData = {}; // Default empty JSON
+    //     }
+    //     file.close();
+    // } else {
+    //     std::cerr << "JSON file not found: " << jsonPath << ". Using default values.\n";
+    //     jsonData = {
+    //         {"position", {{"x", 0.0f}, {"y", 0.0f}, {"z", 0.0f}}},
+    //         {"rotation", {{"x", 0.0f}, {"y", 0.0f}, {"z", 0.0f}}},
+    //         {"scale", 1.0f}
+    //     };
+    // }
 }
 
 // Destructor
@@ -104,16 +111,21 @@ float GameObject::GetScale() const {
 // Update method
 void GameObject::Update() {
     // Apply physics and user input here if needed
-    if(isSelected)
-    {
-        DrawCubeWires(position, scale + 0.1f, scale + 0.1f, scale + 0.1f, RED);
-    }
-    DrawCubeWires(position, scale + 0.1f, scale + 0.1f, scale + 0.1f, RED);
 }
 
 // Draw method
 void GameObject::Draw() {
     // Scale bounding box based on the object's scale
     //Draw Model
+    if(isSelected)
+    {
+        DrawCubeWires(position, scale + 0.1f, scale + 0.1f, scale + 0.1f, RED);
+    }
     DrawModel(model, position, scale, WHITE);
+}
+
+void GameObject::clear()
+{
+    
+    GameObject::~GameObject();
 }

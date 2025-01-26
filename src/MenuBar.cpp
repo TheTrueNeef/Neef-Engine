@@ -124,29 +124,46 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
     ImGui::Text("Objects In Scene");
     ImGui::Separator();
     // Add content for the left menu here
-    if(ImGui::BeginTabBar("Objects"))
+    if (ImGui::BeginTabBar("Objects")) 
     {
-        if(ImGui::TabItemButton("Add"))
-        {
-            GameObject* obj1 = new GameObject(0,"resources/rv.obj", "", "");
-            sc->selected = obj1;
-            // Add objects to the scene
-            sc->AddGameObject(obj1);
+        if (ImGui::BeginCombo("Add Object", "Add")) 
+        { // Ensure EndCombo is only called if BeginCombo returns true
+            if (ImGui::Selectable("Cube")) 
+            {
+                GameObject* cube = new GameObject(0, "", "", "");
+                pos = {0, 0, 0};
+                rot = {0, 0, 0};
+                sc->AddGameObject(cube);
+            }
+            if (ImGui::Selectable("Sphere")) 
+            {
+                GameObject* sphere = new GameObject(0, "", "", "");
+                pos = {0, 0, 0};
+                rot = {0, 0, 0};
+                sc->AddGameObject(sphere);
+            }
+            if (ImGui::Selectable("Custom Model")) {
+                // Action for Custom Model
+            }
+            ImGui::EndCombo(); // EndCombo is now properly paired
         }
-        if(ImGui::TabItemButton("Remove"))
+        if (ImGui::Button("Remove")) 
         {
-
+            // Logic for removing the selected object
+            if (sc->selected != nullptr) 
+            {
+                sc->RemoveGameObject(sc->selected);
+                sc->selected = nullptr;
+            }
         }
-        if(ImGui::TabItemButton("New Scene"))
+        if (ImGui::Button("New Scene")) 
         {
-
+            // Logic for creating a new scene
+            sc->selected = nullptr;
+            sc->ClearScene();
         }
+        ImGui::EndTabBar();
     }
-    ImGui::Text("Option 1");
-    ImGui::Text("Option 2");
-    ImGui::Text("Option 3");
-    
-    ImGui::EndTabBar();
     ImGui::End();
     ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
     // Right Menu

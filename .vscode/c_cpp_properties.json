@@ -3,9 +3,13 @@
         {
             "name": "Win32",
             "includePath": [
-                "C:/raylib/raylib/src/**",
-                "${workspaceFolder}/**",
-                "${workspaceFolder}/include/**"
+                "${workspaceFolder}/include",      // Relative path to the 'include' folder in your project
+                "${workspaceFolder}/src",          // Relative path to the 'src' folder in your project
+                "${workspaceFolder}/raylib/src", // Raylib headers in an internal folder
+                "${workspaceFolder}/imgui", // Imgui headers in an internal folder
+                "${workspaceFolder}/json/include/nlohmann", // Json headers in an internal 
+                "${workspaceFolder}/rlImGui", // Imgui headers in an internal folder
+                "${workspaceFolder}/**"            // Include all subfolders in the workspace
             ],
             "defines": [
                 "_DEBUG",

@@ -38,6 +38,12 @@ Scene::~Scene() {
 
 // Add a GameObject to the scene
 void Scene::AddGameObject(GameObject* gameObject) {
+    if(selected != nullptr)
+    {
+        selected->isSelected = false;
+    }
+    gameObject->isSelected = true;
+    selected = gameObject;
     gameObjects.push_back(gameObject);
 }
 
