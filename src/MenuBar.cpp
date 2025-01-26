@@ -1,5 +1,5 @@
 #include "MenuBar.h"
-#include "C:/msys64/ucrt64/include/raylib.h"
+#include "raylib.h"
 #include <iostream>
 #include <cstring>
 #include <raymath.h>
@@ -13,7 +13,7 @@
 #include <cstdio>
 using json = nlohmann::json; // Alias the namespace for easier usage
 
-void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot) {
+void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot, Scene* sc) {
     // Use the custom font if it's available
     if (customFont) {
         ImGui::PushFont(customFont);
@@ -128,7 +128,10 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
     {
         if(ImGui::TabItemButton("Add"))
         {
-            
+            GameObject* obj1 = new GameObject(0,"resources/rv.obj", "", "");
+            sc->selected = obj1;
+            // Add objects to the scene
+            sc->AddGameObject(obj1);
         }
         if(ImGui::TabItemButton("Remove"))
         {

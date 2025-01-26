@@ -13,15 +13,14 @@ private:
     float scale;            // Uniform scale factor
     Model model;            // Model of the object
     Texture texture;        // Texture for the model
-
     void SaveToJson();      // Save properties to the JSON file
-
 public:
     json jsonData;          // JSON object to store properties
     std::string jsonFilename; // JSON filename for saving/loading
-
+    bool isSelected;
+    int CUBE_ID{0}, MODEL_ID{1};
     // Constructor and Destructor
-    GameObject(const std::string& modelPath, const std::string& texturePath, const std::string& jsonFilename);
+    GameObject(int modelID, const std::string& modelPath, const std::string& texturePath, const std::string& jsonFilename);
     ~GameObject();
 
     // Setters

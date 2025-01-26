@@ -1,0 +1,15 @@
+cd src
+g++ main.cpp mouse_movement.cpp GameObject.cpp Scene.cpp MenuBar.cpp imgui_demo.cpp imgui_draw.cpp imgui_tables.cpp imgui_widgets.cpp imgui.cpp rlImgui.cpp -o main -L"C:/msys64/ucrt64/lib" -I"C:/msys64/ucrt64/include" -I"C:/PRJ/Neef-Engine/include" -lraylib -lopengl32 -lgdi32 -lwinmm
+.\main.exe
+
+
+##LINUX
+
+valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./main
+
+cd src
+valgrind --leak-check=full ./main
+
+g++ main.cpp mouse_movement.cpp GameObject.cpp Scene.cpp MenuBar.cpp imgui_demo.cpp imgui_draw.cpp imgui_tables.cpp imgui_widgets.cpp imgui.cpp rlImgui.cpp -o main \
+-I/home/adnan/raylib/src -I/home/adnan/imgui -I/home/adnan/json/single_include \
+-L/home/adnan/raylib/build -L/usr/local/lib -lraylib -lGL -lX11 -lpthread -ldl -lm

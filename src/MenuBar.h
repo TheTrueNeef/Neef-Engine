@@ -1,7 +1,7 @@
 #ifndef MENUBAR_H
 #define MENUBAR_H
 
-#include "C:/msys64/ucrt64/include/raylib.h"
+#include "raylib.h"
 #include <iostream>
 #include <cstring>
 #include <raymath.h>
@@ -16,7 +16,7 @@ using json = nlohmann::json; // Alias the namespace for easier usage
 
 class MenuBar {
 public:
-    void ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot);
+    void ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot,Scene* sc);
 };
 
 #endif // MENUBAR_H

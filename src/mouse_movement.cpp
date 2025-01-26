@@ -1,4 +1,4 @@
-#include "C:/msys64/ucrt64/include/raylib.h"
+#include "raylib.h"
 #include <iostream>
 #include <cstring>
 #include <raymath.h>

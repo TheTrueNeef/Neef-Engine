@@ -44,8 +44,14 @@
         {
             "name": "Linux",
             "includePath": [
-                "/home/linuxbrew/.linuxbrew/include",
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/include",      // Relative path to the 'include' folder in your project
+                "${workspaceFolder}/src",          // Relative path to the 'src' folder in your project
+                "${workspaceFolder}/raylib/src", // Raylib headers in an internal folder
+                "${workspaceFolder}/imgui", // Imgui headers in an internal folder
+                "${workspaceFolder}/json/include/nlohmann", // Json headers in an internal 
+                "${workspaceFolder}/rlImGui", // Imgui headers in an internal folder
+                "/usr/include",                    // Standard Linux include paths
+                "${workspaceFolder}/**"            // Include all subfolders in the workspace
             ],
             "defines": [
                 "_DEBUG",
@@ -54,9 +60,10 @@
                 "GRAPHICS_API_OPENGL_33",
                 "PLATFORM_DESKTOP"
             ],
+            "compilerPath": "/usr/bin/g++",          // Default g++ compiler in WSL
             "cStandard": "c11",
             "cppStandard": "c++14",
-            "intelliSenseMode": "gcc-x64"
+            "intelliSenseMode": "gcc-x64"            // Use the gcc mode for Linux
         }
     ],
     "version": 4

@@ -1,4 +1,4 @@
-#include "C:/msys64/ucrt64/include/raylib.h"
+#include "raylib.h"
 #include <iostream>
 #include <cstring>
 #include <raymath.h>
@@ -21,33 +21,18 @@ using json = nlohmann::json; // Alias the namespace for easier usage
 #define FRAME_COUNT 28  // Total number of frames
 #define FRAME_DELAY 0.04f // Delay per frame in seconds
 
-
-
-void physicsHandler() {}
-
-
-void gameloop()
-{
-}
-
 void InitializeFonts(ImFont* customFont) {
     ImGuiIO& io = ImGui::GetIO();
-    customFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("../resources/fonts/aristotelica-icons-regular.ttf", 20.0f);
+    customFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("resources/fonts/aristotelica-icons-regular.ttf", 20.0f);
                 if (customFont == nullptr) {
         TraceLog(LOG_ERROR, "Failed to load font!");
     } else {
         rlImGuiReloadFonts(); // Reload fonts after adding a new one
     }
-    
 }
 
 void userInputHandler(bool &menuFLag, bool &refMenu, Camera3D &cam, float &mveAmount) 
 {
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        if (GetMouseX() >= GetScreenWidth() - 40 && GetMouseY() <= 40) {
-            CloseWindow();
-        }
-    }
     if (IsKeyPressed(KEY_ENTER) && !menuFLag) {
         refMenu = false;
         menuFLag = !menuFLag;
@@ -59,6 +44,8 @@ void userInputHandler(bool &menuFLag, bool &refMenu, Camera3D &cam, float &mveAm
 
         // Ensure the window is positioned at the top-left corner
         SetWindowPosition(0,30);
+        SetWindowState(FLAG_WINDOW_MAXIMIZED);
+        SetWindowFocused();
 
         // Ensure the window has decorations (borders, title bar, etc.)
         ClearWindowState(FLAG_FULLSCREEN_MODE);
@@ -77,7 +64,7 @@ int main(void) {
     SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_TRANSPARENT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT); 
     InitWindow(screenWidth, screenHeight, "Neef Engine V-0.0f");
     SetWindowMinSize(800,450);
-    Image icon = LoadImage("../resources/neeflogo/icon.png");
+    Image icon = LoadImage("resources/neeflogo/icon.png");
     SetWindowIcon(icon);
     SetExitKey(KEY_B && KEY_A);
     // Camera setup
@@ -92,43 +79,26 @@ int main(void) {
     camMain.position.z = Clamp(camMain.position.z, -200, 200);
     // Sensitivity for camera rotation
     float sensitivity = 0.1f;
-    //DisableCursor(); // Lock cursor for camera control
-    //
-    float heights[MAX_COLUMNS] = { 0 };
-    Vector3 positions[MAX_COLUMNS] = { 0 };
-    Color colors[MAX_COLUMNS] = { 0 };
-
-    for (int i = 0; i < MAX_COLUMNS; i++)
-    {
-        heights[i] = (float)GetRandomValue(1, 12);
-        positions[i] = (Vector3){ (float)GetRandomValue(-15, 15), heights[i]/2.0f, (float)GetRandomValue(-15, 15) };
-        //colors[i] = BLACK;
-    }
-    //
+    
     // Physics
     float gravity = -9.8f; // Gravity force (downwards)
     float velocity = 0.0f; // Initial velocity
     float groundLevel = -5.0f; // Ground level (Y position of the floor)
 
-    Texture2D topMenuBack = LoadTexture("../resources/topMenu.png");
-    Texture2D LRMenuBack = LoadTexture("../resources/leftMenuBack.png");
-    Texture2D botMenuBack = LoadTexture("../resources/bottomMenu.png");
-    Image logoImage = LoadImage("../resources/neeflogo/neeflogo3.png");
+    Texture2D topMenuBack = LoadTexture("resources/topMenu.png");
+    Texture2D LRMenuBack = LoadTexture("resources/leftMenuBack.png");
+    Texture2D botMenuBack = LoadTexture("resources/bottomMenu.png");
+    Image logoImage = LoadImage("resources/neeflogo/neeflogo3.png");
     //
     Scene scene("TemplateScene");
     MenuBar guiMENU;
-    // Create some GameObjects
-    GameObject* obj1 = new GameObject("resources/rv.obj", "", "");
-    scene.selected = obj1;
-    // Add objects to the scene
-    scene.AddGameObject(obj1);
     //
 
     float pitch = 0.0f;
     float roll = 0.0f;
     float yaw = 0.0f;
 
-    Vector3 Cuberotation = {0.0f,0.0f,0.0f}; // x: pitch, y: roll, z: yaw
+    Vector3 rotation = {0.0f,0.0f,0.0f}; // x: pitch, y: roll, z: yaw
 
     //
     ImageResize(&logoImage,logoImage.width/70,logoImage.height/70);
@@ -136,7 +106,7 @@ int main(void) {
     Texture2D frames[FRAME_COUNT];
     for (int i = 0; i < FRAME_COUNT; i++) {
         char fileName[64];
-        snprintf(fileName, sizeof(fileName), "../resources/loading/frame_%02d_delay-0.04s.png", i); // Updated file naming
+        snprintf(fileName, sizeof(fileName), "resources/loading/frame_%02d_delay-0.04s.png", i); // Updated file naming
         frames[i] = LoadTexture(fileName);
 
         if (frames[i].id == 0) {
@@ -160,7 +130,7 @@ int main(void) {
     bool mouseMovementEnabled = false;
 
     //temp
-    Vector3 posx = {0,0,0};
+    Vector3 position = {0,0,0};
     while (!WindowShouldClose()) {
 
 
@@ -195,7 +165,7 @@ int main(void) {
             ClearWindowState(FLAG_FULLSCREEN_MODE);
             ClearWindowState(FLAG_WINDOW_UNDECORATED);
             DrawText("PRESS \"ENTER\" TO START...", 0, 80, 40, WHITE);
-            DrawText("Neef Engine Development kit\nDeveloper build V 0.0-f", 0, 0, 10, WHITE);
+            DrawText("Neef Engine Development kit\nDeveloper build V 0.0-f1", 0, 0, 10, WHITE);
             DrawText("x", 1892, 0, 40, RED);
             DrawLine(1880, 0, 1880, 40, RED);
             DrawLine(1880, 40, 1920, 40, RED);
@@ -228,9 +198,12 @@ int main(void) {
             DrawFPS(1540,95);
             BeginScissorMode(400,30,1120,720);
             //apply transformations
-
-            scene.selected->SetPosition(posx);
-            scene.selected->SetRotation(Cuberotation);
+            if(scene.selected != nullptr)
+            {
+                scene.selected->isSelected = true;
+                scene.selected->SetPosition(position);
+                scene.selected->SetRotation(rotation);
+            }
             BeginMode3D(camMain);
                 scene.Update();
                 scene.Draw();
@@ -242,8 +215,8 @@ int main(void) {
             ImGui_ImplRaylib_Init();
             ImGui_ImplRaylib_NewFrame();
             rlImGuiBegin();
-            //ShowMenuBar(customFont, camMain, posx, Cuberotation);
-            guiMENU.ShowMenuBar(customFont, camMain, posx, Cuberotation);
+            //ShowMenuBar(customFont, camMain, position, rotation);
+            guiMENU.ShowMenuBar(customFont, camMain, position, rotation, &scene);
             rlImGuiEnd();
         } else {
             ClearBackground(BLANK);  // Transparent background initially
@@ -282,6 +255,10 @@ int main(void) {
     }
     scene.ClearScene();
     CloseWindow();
+    //Delete pointers
+    delete customFont;
+    customFont = nullptr;
 
+    
     return 0;
 }

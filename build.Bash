@@ -1,3 +1,16 @@
 cd src
 g++ main.cpp mouse_movement.cpp GameObject.cpp Scene.cpp MenuBar.cpp imgui_demo.cpp imgui_draw.cpp imgui_tables.cpp imgui_widgets.cpp imgui.cpp rlImgui.cpp -o main -L"C:/msys64/ucrt64/lib" -I"C:/msys64/ucrt64/include" -I"C:/PRJ/Neef-Engine/include" -lraylib -lopengl32 -lgdi32 -lwinmm
 .\main.exe
+
+valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./main
+
+valgrind --leak-check=full --track-origins=yes ./main
+
+g++ src/main.cpp src/mouse_movement.cpp src/GameObject.cpp src/Scene.cpp src/MenuBar.cpp src/imgui_demo.cpp src/imgui_draw.cpp src/imgui_tables.cpp src/imgui_widgets.cpp src/imgui.cpp src/rlImgui.cpp -o main \
+-I${PWD}/raylib/src \
+-I${PWD}/imgui \
+-I${PWD}/json/single_include/nlohmann \
+-I${PWD}/rlImGui \
+-L${PWD}/raylib/build \
+-L/usr/local/lib \
+-lraylib -lGL -lX11 -lpthread -ldl -lm

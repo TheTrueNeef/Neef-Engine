@@ -1,4 +1,4 @@
-#include "C:/msys64/ucrt64/include/raylib.h"
+#include "raylib.h"
 #include <iostream>
 #include <cstring>
 #include <raymath.h>
@@ -12,30 +12,39 @@
 #include <stdexcept>
 
 // Constructor
-GameObject::GameObject(const std::string& modelPath, const std::string& texturePath, const std::string& jsonPath) {
+GameObject::GameObject(int modelID, const std::string& modelPath, const std::string& texturePath, const std::string& jsonPath) {
     position = {0.0f, 0.0f, 0.0f};
     rotation = {0.0f, 0.0f, 0.0f};
     scale = 1.0f;
     // Load model and texture
     model = LoadModel("../resources/Rv.obj");
     texture = LoadTexture(texturePath.c_str());
+    // 0 Cube, 1 Sphere, 2 Model
+    switch (modelID)
+    {
+    case 0:
+        model = LoadModelFromMesh(GenMeshCube(1.0f,1.0f,1.0f));
+        break;
+    case 1:
+        model = LoadModelFromMesh(GenMeshSphere(1.0f,1.0f,1.0f));
+        break;
+    case 2:
+        model = LoadModel(modelPath.c_str());
+        texture = LoadTexture(texturePath.c_str());
 
-    // Associate texture with model
-    model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
-    std::cout << model.materialCount;
-    for (int i = 0; i < model.materialCount; i++) {
-    Material *material = &model.materials[i];
+        // Associate texture with model
+        model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+        std::cout << model.materialCount;
+        for (int i = 0; i < model.materialCount; i++) 
+        {
+            Material *material = &model.materials[i];
+        }
 
-    // Check and assign diffuse map
-    if (material->maps[MATERIAL_MAP_DIFFUSE].texture.id == 0) {
-        material->maps[MATERIAL_MAP_DIFFUSE].texture = LoadTexture("../resources/textures/gmc_exterior_dif.png");
+        break;
+    default:
+        break;
     }
 
-    // Check and assign specular map
-    if (material->maps[MATERIAL_MAP_SPECULAR].texture.id == 0) {
-        material->maps[MATERIAL_MAP_SPECULAR].texture = LoadTexture("../resources/textures/gmc_exterior_spc_clr.jpg");
-    }
-}
     // Load JSON data
     std::ifstream file(jsonPath);
     if (file.is_open()) {
@@ -95,7 +104,11 @@ float GameObject::GetScale() const {
 // Update method
 void GameObject::Update() {
     // Apply physics and user input here if needed
-    
+    if(isSelected)
+    {
+        DrawCubeWires(position, scale + 0.1f, scale + 0.1f, scale + 0.1f, RED);
+    }
+    DrawCubeWires(position, scale + 0.1f, scale + 0.1f, scale + 0.1f, RED);
 }
 
 // Draw method
