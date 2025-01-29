@@ -14,35 +14,6 @@
 #include "ImGuiFileDialog.h"
 using json = nlohmann::json; // Alias the namespace for easier usage
 
-void HandleCustomModelDialog(Scene* sc, Vector3& pos, Vector3& rot) {
-    if (ImGuiFileDialog::Instance()->Display("CustomModelDlgKey")) {
-        if (ImGuiFileDialog::Instance()->IsOk()) {
-            std::string modelPath = ImGuiFileDialog::Instance()->GetFilePathName();
-
-            std::string texturePath = modelPath;
-            std::size_t extensionPos = texturePath.rfind(".obj");
-            if (extensionPos != std::string::npos) {
-                // Replace the ".obj" extension with ".mtl"
-                texturePath.replace(extensionPos, 4, ".mtl");
-            } 
-            else 
-            {
-                // Handle cases where the .obj extension is not found (optional)
-                std::cerr << "Error: File does not have a .obj extension\n";
-            }
-
-            GameObject* modelObject = new GameObject(2, modelPath, texturePath, "");            
-            // Set initial position and rotation
-            pos = {0, 0, 0};
-            rot = {0, 0, 0};
-            // Add to scene
-            sc->AddGameObject(modelObject);
-        }
-        // Close the dialog
-        ImGuiFileDialog::Instance()->Close();
-    }
-}
-
 void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot, Scene* sc, float& scale) {
     // Use the custom font if it's available
     if (customFont) {
@@ -55,6 +26,7 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 15)); // Larger frame padding
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(30, 5));  // Space out items
     ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
+
     // Begin the main menu bar
     if (ImGui::BeginMainMenuBar()) {
         // File menu
@@ -90,20 +62,17 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
 
         // Help menu
         if (ImGui::BeginMenu("Help")) {
-            if (ImGui::MenuItem("\uf059 Documentation", "F1")) 
-            {
+            if (ImGui::MenuItem("\uf059 Documentation", "F1")) {
                 system("start https://neefengine.com/docs");
             }
-            if (ImGui::MenuItem("\uf05a About")) 
-            {
+            if (ImGui::MenuItem("\uf05a About")) {
                 // Action to show about dialog
             }
             ImGui::EndMenu();
         }
 
         // Start menu
-        if (ImGui::BeginMenu("Start")) 
-        {
+        if (ImGui::BeginMenu("Start")) {
             if (ImGui::MenuItem("Run Game Windowed", "F1")) {
                 // Action to open documentation
             }
@@ -114,20 +83,16 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
         }
 
         // Stop menu
-        if (ImGui::BeginMenu("Stop")) 
-        {
-            if (ImGui::MenuItem("\uf059 Stop", "F1")) 
-            {
+        if (ImGui::BeginMenu("Stop")) {
+            if (ImGui::MenuItem("\uf059 Stop", "F1")) {
                 // Action to stop code
             }
             ImGui::EndMenu();
         }
 
         // Windows menu
-        if (ImGui::BeginMenu("Windows")) 
-        {
-            if (ImGui::MenuItem("\uf059 None", "F1")) 
-            {
+        if (ImGui::BeginMenu("Windows")) {
+            if (ImGui::MenuItem("\uf059 None", "F1")) {
                 // Action to stop code
             }
             ImGui::EndMenu();
@@ -143,86 +108,95 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.1f, 0.5f, 1.0f));  // Active color
 
     const float menuWidth = 400.0f;
-    const float menuHeight = GetScreenHeight() -50.0f;
+    const float menuHeight = GetScreenHeight() - 50.0f;
     const float menuPos = 42.0f;
     ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
+
     // Left Menu
     ImGui::SetNextWindowPos(ImVec2(0, menuPos)); // Position: Top-left corner below the main menu bar
     ImGui::SetNextWindowSize(ImVec2(menuWidth, menuHeight)); // Size: 400px wide, screen height - 50px
-    //ImGui::SetWindowFontScale(10.0f); // Scale text in the current window
     ImGui::Begin("Objects In Scene", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration);
     ImGui::Text("Objects In Scene");
     ImGui::Separator();
+
     // Add content for the left menu here
-    if (ImGui::BeginTabBar("Objects")) 
-    {
-        if (ImGui::BeginCombo("Add Object", "Add")) 
-        { // Ensure EndCombo is only called if BeginCombo returns true
-            if (ImGui::Selectable("Cube")) 
-            {
+    if (ImGui::BeginTabBar("Objects")) {
+        if (ImGui::BeginCombo("Add Object", "Add")) {
+            if (ImGui::Selectable("Cube")) {
                 GameObject* cube = new GameObject(0, "", "", "");
                 pos = {0, 0, 0};
                 rot = {0, 0, 0};
+                scale = 1.0f;
                 sc->AddGameObject(cube);
             }
-            if (ImGui::Selectable("Sphere")) 
-            {
+            if (ImGui::Selectable("Sphere")) {
                 GameObject* sphere = new GameObject(0, "", "", "");
                 pos = {0, 0, 0};
                 rot = {0, 0, 0};
+                scale = 1.0f;
                 sc->AddGameObject(sphere);
             }
             if (ImGui::Selectable("Custom Model")) {
-                // Action for Custom Model
+                // Open the file dialog for custom model selection
                 ImGui::SetNextWindowSize(ImVec2(600, 400));
-                ImGuiFileDialog::Instance()->OpenDialog("CustomModelDlgKey", 
-                                                "Select Custom Model", 
-                                                ".obj,.fbx,.");
+                ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose Model", ".obj,.fbx,.gltf");
             }
-            ImGui::EndCombo(); // EndCombo is now properly paired
+            ImGui::EndCombo();
         }
-        if (ImGui::Button("Remove")) 
-        {
+
+        if (ImGui::Button("Remove")) {
             // Logic for removing the selected object
-            if (sc->selected != nullptr) 
-            {
+            if (sc->selected != nullptr) {
                 sc->RemoveGameObject(sc->selected);
                 sc->selected = nullptr;
             }
         }
-        if (ImGui::Button("New Scene")) 
-        {
+
+        if (ImGui::Button("New Scene")) {
             // Logic for creating a new scene
             sc->selected = nullptr;
             sc->ClearScene();
         }
         ImGui::EndTabBar();
     }
+
+    // Handle the file dialog for custom model selection
+    if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey")) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+            std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+
+            // Create a new GameObject and load the custom model
+            GameObject* customModel = new GameObject(2, filePathName, "", "");
+            pos = {0, 0, 0};
+            rot = {0, 0, 0};
+            scale = 1.0f;
+            sc->AddGameObject(customModel);
+        }
+
+        // Close the file dialog
+        ImGuiFileDialog::Instance()->Close();
+    }
+
     ImGui::End();
+
+    // Right Menu (unchanged)
     ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
-    // Right Menu
     ImGui::SetNextWindowPos(ImVec2(GetScreenWidth() - menuWidth, menuPos)); // Position: Top-right corner below the main menu bar
     ImGui::SetNextWindowSize(ImVec2(menuWidth, menuHeight)); // Size: 400px wide, screen height - 50px
     ImGui::Begin("Right Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration);
     ImGui::Text("Right Side Menu");
     ImGui::Separator();
-    //Cordinates
-    if(ImGui::BeginTabBar("Object Inspector"))
-    {
-        if(ImGui::TabItemButton("Properties"))
-        {
 
-        }
-        if(ImGui::TabItemButton("Shaders and Materials"))
-        {
-
-        }
-        if(ImGui::TabItemButton("Animations"))
-        {
-
-        }
+    // Object Inspector (unchanged)
+    if (ImGui::BeginTabBar("Object Inspector")) {
+        if (ImGui::TabItemButton("Properties")) {}
+        if (ImGui::TabItemButton("Shaders and Materials")) {}
+        if (ImGui::TabItemButton("Animations")) {}
+        ImGui::EndTabBar();
     }
-    ImGui::EndTabBar();
+
+    // Transform and other UI elements (unchanged)
     ImGui::Text("Vector Space Position and Rotation");
     char coordinates[50];
     sprintf(coordinates, "X: %.2f, Y: %.2f, Z: %.2f", camMain.position.x, camMain.position.y, camMain.position.z);
@@ -250,18 +224,17 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
     ImGui::Text("Current Value: %.2f", scale);
     ImGui::SliderFloat("Scale:", &scale, 0.0f, 100.0f, "Value: %.2f");
     ImGui::End();
+
+    // Bottom Menu (unchanged)
     ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
-    // Bottom Menu
     ImGui::SetNextWindowPos(ImVec2(menuWidth, 750.0f)); // Position: Top-right corner below the main menu bar
-    ImGui::SetNextWindowSize(ImVec2(GetScreenWidth() - 2.0f*menuWidth, menuPos + 330.0f)); // Size: 400px wide, screen height - 50px
+    ImGui::SetNextWindowSize(ImVec2(GetScreenWidth() - 2.0f * menuWidth, menuPos + 330.0f)); // Size: 400px wide, screen height - 50px
     ImGui::Begin("File Manager", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration);
     ImGui::Text("File Manager");
     ImGui::Separator();
-    // Add content for the Bottom menu here
     ImGui::Text("Option A");
     ImGui::Text("Option B");
     ImGui::Text("Option C");
-    
     ImGui::End();
 
     // Revert to default font if custom font was used
@@ -269,7 +242,4 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
         ImGui::PopFont();
     }
     ImGui::PopStyleColor(3);
-
-    // Handle the custom model dialog
-    HandleCustomModelDialog(sc, pos, rot);
 }
