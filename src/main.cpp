@@ -131,6 +131,7 @@ int main(void) {
 
     //temp
     Vector3 position = {0,0,0};
+    float scale = 1.0f;
     while (!WindowShouldClose()) {
 
 
@@ -203,6 +204,7 @@ int main(void) {
                 scene.selected->isSelected = true;
                 scene.selected->SetPosition(position);
                 scene.selected->SetRotation(rotation);
+                scene.selected->SetScale(scale);
             }
             BeginMode3D(camMain);
                 scene.Update();
@@ -216,7 +218,7 @@ int main(void) {
             ImGui_ImplRaylib_NewFrame();
             rlImGuiBegin();
             //ShowMenuBar(customFont, camMain, position, rotation);
-            guiMENU.ShowMenuBar(customFont, camMain, position, rotation, &scene);
+            guiMENU.ShowMenuBar(customFont, camMain, position, rotation, &scene, scale);
             rlImGuiEnd();
         } else {
             ClearBackground(BLANK);  // Transparent background initially

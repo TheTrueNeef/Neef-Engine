@@ -11,9 +11,39 @@
 #include "Scene.h"
 #include "json.hpp"
 #include <cstdio>
+#include "ImGuiFileDialog.h"
 using json = nlohmann::json; // Alias the namespace for easier usage
 
-void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot, Scene* sc) {
+void HandleCustomModelDialog(Scene* sc, Vector3& pos, Vector3& rot) {
+    if (ImGuiFileDialog::Instance()->Display("CustomModelDlgKey")) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            std::string modelPath = ImGuiFileDialog::Instance()->GetFilePathName();
+
+            std::string texturePath = modelPath;
+            std::size_t extensionPos = texturePath.rfind(".obj");
+            if (extensionPos != std::string::npos) {
+                // Replace the ".obj" extension with ".mtl"
+                texturePath.replace(extensionPos, 4, ".mtl");
+            } 
+            else 
+            {
+                // Handle cases where the .obj extension is not found (optional)
+                std::cerr << "Error: File does not have a .obj extension\n";
+            }
+
+            GameObject* modelObject = new GameObject(2, modelPath, texturePath, "");            
+            // Set initial position and rotation
+            pos = {0, 0, 0};
+            rot = {0, 0, 0};
+            // Add to scene
+            sc->AddGameObject(modelObject);
+        }
+        // Close the dialog
+        ImGuiFileDialog::Instance()->Close();
+    }
+}
+
+void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot, Scene* sc, float& scale) {
     // Use the custom font if it's available
     if (customFont) {
         ImGui::PushFont(customFont);
@@ -144,6 +174,10 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
             }
             if (ImGui::Selectable("Custom Model")) {
                 // Action for Custom Model
+                ImGui::SetNextWindowSize(ImVec2(600, 400));
+                ImGuiFileDialog::Instance()->OpenDialog("CustomModelDlgKey", 
+                                                "Select Custom Model", 
+                                                ".obj,.fbx,.");
             }
             ImGui::EndCombo(); // EndCombo is now properly paired
         }
@@ -213,6 +247,8 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
     ImGui::Text("Current Value: %.2f", rot.z);
     ImGui::SliderFloat("Roll:", &rot.z, -360.0f, 360.0f, "Value: %.2f");
     ImGui::Separator();
+    ImGui::Text("Current Value: %.2f", scale);
+    ImGui::SliderFloat("Scale:", &scale, 0.0f, 100.0f, "Value: %.2f");
     ImGui::End();
     ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
     // Bottom Menu
@@ -233,4 +269,7 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
         ImGui::PopFont();
     }
     ImGui::PopStyleColor(3);
+
+    // Handle the custom model dialog
+    HandleCustomModelDialog(sc, pos, rot);
 }
