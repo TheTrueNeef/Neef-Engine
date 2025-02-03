@@ -123,9 +123,9 @@ int main(void) {
     int currentFrame = 0;
     float frameTimer = 0.0f;
     float timer = 0.0f;
-    bool showWhiteBackground = false;  // Flag to control the background color change
+    bool ProjectSelectionMenu = false;  // Flag to control the background color change
     bool displaySphere = true;  // Flag to control sphere rendering
-    bool inGame = false;
+    bool OpenEditor = false;
     SetTargetFPS(60);
     bool mouseMovementEnabled = false;
 
@@ -133,73 +133,61 @@ int main(void) {
     Vector3 position = {0,0,0};
     float scale = 1.0f;
     while (!WindowShouldClose()) {
-
-
         // Gameplay
-        float move = 1.0f;
-        if(inGame) {move = 0.5f;}
-        else {move = 0.0f;}
-        userInputHandler(inGame, showWhiteBackground, camMain, move);
-        
-
+        float move = 0.5f;
+        userInputHandler(OpenEditor, ProjectSelectionMenu, camMain, move);
         // Update animation frames
         frameTimer += GetFrameTime();
-        if (frameTimer >= FRAME_DELAY && !inGame) {
+        if (frameTimer >= FRAME_DELAY && !OpenEditor && !ProjectSelectionMenu) {
             frameTimer = 0.0f;
             currentFrame = (currentFrame + 1) % FRAME_COUNT; // Loop through frames
         }
 
         // Track time for menu
         timer += GetFrameTime();
-        if (timer >= 2.5f && !showWhiteBackground && !inGame) {
-            showWhiteBackground = true;  // Change to white background
+        if (timer >= 2.5f && !ProjectSelectionMenu && !OpenEditor) {
+            ProjectSelectionMenu = true;  // Change to white background
             displaySphere = false;  // Stop displaying the sphere
-            SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_UNDECORATED); // Default window flags
+            SetConfigFlags(FLAG_WINDOW_RESIZABLE); // Default window flags
+            ClearWindowState(FLAG_FULLSCREEN_MODE);
             SetWindowFocused();
             SetWindowSize(1000, 700);
         }
 
         // Start drawing
         BeginDrawing();
-        if (showWhiteBackground) {
-            ClearBackground(DARKGRAY);  
-            ClearWindowState(FLAG_FULLSCREEN_MODE);
-            ClearWindowState(FLAG_WINDOW_UNDECORATED);
-            DrawText("PRESS \"ENTER\" TO START...", 0, 80, 40, WHITE);
-            DrawText("Neef Engine Development kit\nDeveloper build V 0.0-f1", 0, 0, 10, WHITE);
-            DrawText("x", 1892, 0, 40, RED);
-            DrawLine(1880, 0, 1880, 40, RED);
-            DrawLine(1880, 40, 1920, 40, RED);
-        } else if (inGame) {
-            if (IsKeyPressed(KEY_M)) {
 
+        if (OpenEditor) 
+        {
+            // Existing OpenEditor logic
+            if (IsKeyPressed(KEY_M)) 
+            {
                 mouseMovementEnabled = !mouseMovementEnabled;
             }
-            
-        // Update camera based on mouse movement if enabled
-            if (mouseMovementEnabled) {
+
+            if (mouseMovementEnabled) 
+            {
                 UpdateMouseMovement(&camMain);
-                HideCursor(); // Hide the system mouse cursor
-                } else {
-                ShowCursor(); // Show the system mouse cursor
+                HideCursor();
+            } 
+            else 
+            {
+                ShowCursor();
             }
             ClearBackground(DARKGRAY);
             ClearWindowState(FLAG_WINDOW_UNDECORATED);
-            
             screenHeight = GetScreenHeight();
-        
-            
-            //Background
-            DrawTexture(LRMenuBack,0,0,WHITE);
-            DrawTexture(LRMenuBack,1520,0,WHITE);
-            DrawTexture(botMenuBack,400,750,WHITE);
-            DrawTexture(topMenuBack,0,0,WHITE);
-            
+            // Background
+            DrawTexture(LRMenuBack, 0, 0, WHITE);
+            DrawTexture(LRMenuBack, 1520, 0, WHITE);
+            DrawTexture(botMenuBack, 400, 750, WHITE);
+            DrawTexture(topMenuBack, 0, 0, WHITE);
+
             DrawTexture(logoTexture, 5, 5, WHITE);
-            DrawFPS(1540,95);
-            BeginScissorMode(400,30,1120,720);
-            //apply transformations
-            if(scene.selected != nullptr)
+            DrawFPS(1540, 95);
+
+            BeginScissorMode(400, 30, 1120, 720);
+            if (scene.selected != nullptr) 
             {
                 scene.selected->isSelected = true;
                 scene.selected->SetPosition(position);
@@ -210,49 +198,47 @@ int main(void) {
                 scene.Update();
                 scene.Draw();
             EndMode3D();
-
-            
             EndScissorMode();
-            //Imgui
+
+            // ImGui logic
             ImGui_ImplRaylib_Init();
             ImGui_ImplRaylib_NewFrame();
             rlImGuiBegin();
-            //ShowMenuBar(customFont, camMain, position, rotation);
-            guiMENU.ShowMenuBar(customFont, camMain, position, rotation, &scene, scale);
-            rlImGuiEnd();
-        } else {
-            ClearBackground(BLANK);  // Transparent background initially
-        }
 
-        if (displaySphere) {
+            if (OpenEditor) 
+            {
+                guiMENU.ShowMenuBar(customFont, camMain, position, rotation, &scene, scale);
+            }
+            rlImGuiEnd();
+        } 
+        else if (ProjectSelectionMenu) 
+        {
+            ClearBackground(DARKGRAY); // Proper background for project selection
+            ClearWindowState(FLAG_WINDOW_UNDECORATED);
+            SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT); 
+            rlImGuiBegin();
+            guiMENU.ProjSelect(customFont, camMain, position, rotation, &scene, scale);
+            rlImGuiEnd();
+        } 
+        else 
+        {
+            ClearBackground(BLANK); // Transparent background initially
+        }
+        if (displaySphere && !ProjectSelectionMenu) 
+        {
+            // Render the sphere loading screen
             Texture2D currentTexture = frames[currentFrame];
             float scaledWidth = currentTexture.width * 3.0f;
             float scaledHeight = currentTexture.height * 3.0f;
-            Rectangle destRect = { 
-                (screenWidth - scaledWidth) / 2, 
-                (screenHeight - scaledHeight) / 2, 
-                scaledWidth, 
-                scaledHeight 
-            };
-            DrawTexturePro(currentTexture, 
-                           (Rectangle){ 0, 0, (float)currentTexture.width, (float)currentTexture.height },
-                           destRect, 
-                           (Vector2){ 0, 0 }, 
-                           0.0f, 
-                           WHITE);
+            Rectangle destRect = {(screenWidth - scaledWidth) / 2, (screenHeight - scaledHeight) / 2, scaledWidth, scaledHeight};
+            DrawTexturePro(currentTexture,(Rectangle){ 0, 0, (float)currentTexture.width, (float)currentTexture.height }, destRect,(Vector2){ 0, 0 },0.0f,WHITE);
         }
-
         EndDrawing();
     }
-
-    //UnloadModel(model);
-
-
-    //unload imgui
     rlImGuiShutdown();
-
     //Unload loading screen
-    for (int i = 0; i < FRAME_COUNT; i++) {
+    for (int i = 0; i < FRAME_COUNT; i++) 
+    {
         UnloadTexture(frames[i]);
     }
     scene.ClearScene();
@@ -260,7 +246,5 @@ int main(void) {
     //Delete pointers
     delete customFont;
     customFont = nullptr;
-
-    
     return 0;
 }

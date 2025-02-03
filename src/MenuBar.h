@@ -17,6 +17,8 @@ using json = nlohmann::json; // Alias the namespace for easier usage
 class MenuBar {
 public:
     void ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot,Scene* sc, float& scale);
+    void ProjSelect(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot,Scene* sc, float& scale);
+
 };
 
 #endif // MENUBAR_H
