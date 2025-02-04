@@ -18,7 +18,7 @@
                 "GRAPHICS_API_OPENGL_33",
                 "PLATFORM_DESKTOP"
             ],
-            "compilerPath": "C:/raylib/w64devkit/bin/gcc.exe",
+            "compilerPath": "C:/raylib/w64devkit/bin/gcc.exe", //Change This to your personal compiler path
             "cStandard": "c99",
             "cppStandard": "c++14",
             "intelliSenseMode": "gcc-x64",
