@@ -13,8 +13,6 @@
 #include <cstdio>
 #include "ImGuiFileDialog.h"
 using json = nlohmann::json; // Alias the namespace for easier usage
-<<<<<<< Updated upstream
-=======
 
 void initColors()
 {
@@ -40,13 +38,13 @@ void initColors()
     ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, ImVec4(0.4f, 0.2f, 0.6f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabHovered, ImVec4(0.5f, 0.3f, 0.7f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabActive, ImVec4(0.3f, 0.1f, 0.5f, 1.0f));
+    
 }
 void popColors()
 {
     int colorsToPop = 17;
     ImGui::PopStyleColor(colorsToPop);
 }
->>>>>>> Stashed changes
 void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot, Scene* sc, float& scale) {
     // Use the custom font if it's available
     if (customFont) {
@@ -320,57 +318,12 @@ void MenuBar::ProjSelect(ImFont* customFont, Camera3D camMain, Vector3& pos, Vec
         
     }
     ImGui::PopStyleColor(3);
-<<<<<<< Updated upstream
-}
-
-void MenuBar::ProjSelect(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot,Scene* sc, float& scale)
-{
-    // Start an ImGui window for project selection
-    ImGui::Begin("Project Selection", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
-
-    ImGui::PushFont(customFont);
-
-    // Example: Display buttons for different projects
-    if (ImGui::Button("Project 1", ImVec2(200, 50)))
-    {
-        //*scene = 1; // Set the scene to Project 1
-        ClearWindowState(FLAG_FULLSCREEN_MODE);
-        ClearWindowState(FLAG_WINDOW_UNDECORATED);
-    }
-
-    if (ImGui::Button("Project 2", ImVec2(200, 50)))
-    {
-        //*scene = 2; // Set the scene to Project 2
-        ClearWindowState(FLAG_FULLSCREEN_MODE);
-        ClearWindowState(FLAG_WINDOW_UNDECORATED);
-    }
-
-    if (ImGui::Button("Exit", ImVec2(200, 50)))
-    {
-        //*scene = -1; // Exit the project selection menu
-        //ProjectSelectionMenu = false;
-    }
-
     ImGui::PopFont();
     ImGui::End();
 
-    ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
-    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f)); // Position: Top-right corner below the main menu bar
-    ImGui::SetNextWindowSize(ImVec2(400, 600)); // Size: 400px wide, screen height - 50px
-    ImGui::Begin("File Manager", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration);
-    ImGui::Text("File Manager");
-=======
-    ImGui::PopFont();
-    ImGui::End();
-
->>>>>>> Stashed changes
     ImGui::Separator();
     ImGui::Text("Option A");
     ImGui::Text("Option B");
     ImGui::Text("Option C");
     ImGui::End();
-<<<<<<< Updated upstream
 }
-=======
-}
->>>>>>> Stashed changes
