@@ -34,7 +34,7 @@ void initColors()
     ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.4f, 0.2f, 0.6f, 1.0f));      // Button color
     ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.3f, 0.1f, 0.5f, 1.0f));  // Active color   
     // Scroll Bar Colors
-    ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, ImVec4(0.0f, 0.0f, 0.0f, 1.0f)); // Background Color
+    ImGui::PushStyleColor(ImGuiCol_ScrollbarBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f)); // Background Color
     ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, ImVec4(0.4f, 0.2f, 0.6f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabHovered, ImVec4(0.5f, 0.3f, 0.7f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabActive, ImVec4(0.3f, 0.1f, 0.5f, 1.0f));

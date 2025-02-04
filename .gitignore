@@ -2,3 +2,6 @@
 *.dsym
 main
 build/
+imgui/
+json/
+raylib/
