@@ -90,8 +90,9 @@ int main(void) {
     //
     Scene scene("TemplateScene");
     MenuBar guiMENU;
+    // Color
+    Vector3 color = {1.0f, 0.0f, 0.0f};
     //
-
     float pitch = 0.0f;
     float roll = 0.0f;
     float yaw = 0.0f;
@@ -212,6 +213,13 @@ int main(void) {
                 scene.selected->SetPosition(position);
                 scene.selected->SetRotation(rotation);
                 scene.selected->SetScale(scale);
+                Color objectColor = {
+                    static_cast<unsigned char>(color.x * 255),
+                    static_cast<unsigned char>(color.y * 255),
+                    static_cast<unsigned char>(color.z * 255),
+                    255 // Alpha = 255 (fully opaque)
+                };
+                scene.selected->SetColor(objectColor);
             }
             BeginMode3D(camMain);
                 scene.Update();
@@ -226,7 +234,7 @@ int main(void) {
 
             if (OpenEditor) 
             {
-                guiMENU.ShowMenuBar(customFont, camMain, position, rotation, &scene, scale, state);
+                guiMENU.ShowMenuBar(customFont, camMain, position, rotation, &scene, scale, state, color);
             }
             rlImGuiEnd();
         } 

@@ -92,7 +92,7 @@ void ShowFileDialog(bool showFileDialog)
         ImGui::EndPopup();
     }
 }
-void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot, Scene* sc, float& scale, ToggleState& state) {
+void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot, Scene* sc, float& scale, ToggleState& state, Vector3& color) {
     // Use the custom font if it's available
     if (customFont) {
         ImGui::PushFont(customFont);
@@ -307,7 +307,6 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
         if (ImGui::TabItemButton("Animations")) {state = ToggleState::Anim;}
         ImGui::EndTabBar();
     }
-    float color[3] = { 1.0f, 0.0f, 0.0f }; // Default to red (RGB)
     switch (state)
     {
     case ToggleState::Prop:
@@ -362,20 +361,11 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
         break;
     case ToggleState::SaM:
     {
-        ImGui::Begin("Color Picker");
         // Advanced RGB color picker
-        ImGui::ColorPicker3("Pick a Color", color);
-        ImGui::End();
-        // Color objectColor = {
-        //     static_cast<unsigned char>(color[0] * 255),
-        //     static_cast<unsigned char>(color[1] * 255),
-        //     static_cast<unsigned char>(color[2] * 255),
-        //     255 // Alpha = 255 (fully opaque)
-        // };
-        // if(sc->selected != nullptr)
-        // {
-        //     sc->selected->SetColor(objectColor);
-        // }
+        float cols[3] = {color.x, color.y, color.z};
+        ImGui::ColorPicker3("Pick a Color", cols);
+        //std::cout << cols[0]<<cols[1]<<cols[2] << std::endl;
+        color = {cols[0],cols[1],cols[2]};
     }
         break;
     default:
