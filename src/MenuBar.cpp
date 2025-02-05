@@ -13,7 +13,17 @@
 #include <cstdio>
 #include "ImGuiFileDialog.h"
 #include "tinyfiledialogs.h"
+
 using json = nlohmann::json; // Alias the namespace for easier usage
+
+std::string getMtlFilePath(const std::string& objFilePath) {
+    size_t dotIndex = objFilePath.find_last_of('.');
+    if (dotIndex != std::string::npos) {
+        return objFilePath.substr(0, dotIndex) + ".mtl"; // Replace extension with .mtl
+    }
+    return objFilePath; // Return original if no extension found
+}
+
 
 void initColors()
 {
@@ -82,14 +92,13 @@ void ShowFileDialog(bool showFileDialog)
         ImGui::EndPopup();
     }
 }
-void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot, Scene* sc, float& scale) {
+void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot, Scene* sc, float& scale, ToggleState& state) {
     // Use the custom font if it's available
     if (customFont) {
         ImGui::PushFont(customFont);
     }
     ImGuiStyle& style = ImGui::GetStyle();
     style.Colors[ImGuiCol_WindowBg].w = 1.0f; // Set the background alpha to 1.0 (fully opaque)
-
     // Adjust style for the menu bar
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 15)); // Larger frame padding
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(30, 5));  // Space out items
@@ -204,19 +213,28 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
             }
             if (ImGui::Selectable("Custom Model")) {
                 // Open the file dialog for custom model selection
-                const char *filePath = tinyfd_openFileDialog("Select Model", "", 0, NULL, NULL, 0);
-
-                if (filePath != nullptr) 
+                const char* filterPatterns[] = { "*.obj" }; // Only allow .obj files
+                const char *filePath = tinyfd_openFileDialog("Select Model", "", 1, filterPatterns, "OBJ Files (*.obj)", 0);
+                try
                 {
-                    std::string filePathName = filePath;
-
-                    // Create and add a new game object
-                    GameObject* customModel = new GameObject(2, filePathName, "", "");
-                    pos = {0, 0, 0};
-                    rot = {0, 0, 0};
-                    scale = 1.0f;
-                    sc->AddGameObject(customModel);
+                    if (filePath) 
+                    {
+                        std::string filePathName = filePath;
+                        std::string mtlPath = getMtlFilePath(filePath);
+                        // Create and add a new game object
+                        GameObject* customModel = new GameObject(2, filePathName, mtlPath, "");
+                        pos = {0, 0, 0};
+                        rot = {0, 0, 0};
+                        scale = 1.0f;
+                        sc->AddGameObject(customModel);
+                    }
                 }
+                catch(const std::exception& e)
+                {
+                    std::cout << "Failed To Load File Exception 1: Report" << std::endl;
+                }
+                
+                
             }
             ImGui::EndCombo(); 
         }
@@ -281,45 +299,90 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
 // If `ImGuiCol_TabDimmed` and `ImGuiCol_TabDimmedSelected` exist in your version of ImGui, 
 // you can adjust them as well to be more subtle
 
-
+    //enum ToggleState { Prop, SaM, Anim }; //Properties, Shaders and Materials, Animations
     // Object Inspector (unchanged)
     if (ImGui::BeginTabBar("Object Inspector")) {
-        if (ImGui::TabItemButton("Properties")) {}
-        if (ImGui::TabItemButton("Shaders and Materials")) {}
-        if (ImGui::TabItemButton("Animations")) {}
+        if (ImGui::TabItemButton("Properties")) {state = ToggleState::Prop;}
+        if (ImGui::TabItemButton("Shaders and Materials")) {state = ToggleState::SaM;}
+        if (ImGui::TabItemButton("Animations")) {state = ToggleState::Anim;}
         ImGui::EndTabBar();
     }
-
-    
-    ImGui::Text("Vector Space Position and Rotation");
-    char coordinates[50];
-    sprintf(coordinates, "X: %.2f, Y: %.2f, Z: %.2f", camMain.position.x, camMain.position.y, camMain.position.z);
-    char target[50];
-    sprintf(target, "X: %.2f, Y: %.2f, Z: %.2f", camMain.target.x, camMain.target.y, camMain.target.z);
-    ImGui::Text(coordinates);
-    ImGui::Text(target);
-    ImGui::Separator();
-    ImGui::Text("Object Transform");
-    ImGui::Text("Current Value: %.2f", pos.x);
-    ImGui::SliderFloat("X:", &pos.x, -100.0f, 100.0f, "Value: %.2f");
-    ImGui::Text("Current Value: %.2f", pos.y);
-    ImGui::SliderFloat("Y:", &pos.y, -100.0f, 100.0f, "Value: %.2f");
-    ImGui::Text("Current Value: %.2f", pos.z);
-    ImGui::SliderFloat("Z:", &pos.z, -100.0f, 100.0f, "Value: %.2f");
-    ImGui::Separator();
-    ImGui::Text("Object Rotation");
-    ImGui::Text("Current Value: %.2f", rot.x);
-    ImGui::SliderFloat("Pitch:", &rot.x, -360.0f, 360.0f, "Value: %.2f");
-    ImGui::Text("Current Value: %.2f", rot.y);
-    ImGui::SliderFloat("Yaw:", &rot.y, -360.0f, 360.0f, "Value: %.2f");
-    ImGui::Text("Current Value: %.2f", rot.z);
-    ImGui::SliderFloat("Roll:", &rot.z, -360.0f, 360.0f, "Value: %.2f");
-    ImGui::Separator();
-    ImGui::Text("Current Value: %.2f", scale);
-    ImGui::SliderFloat("Scale:", &scale, 0.0f, 100.0f, "Value: %.2f");
+    float color[3] = { 1.0f, 0.0f, 0.0f }; // Default to red (RGB)
+    switch (state)
+    {
+    case ToggleState::Prop:
+        ImGui::Text("Vector Space Position and Rotation");
+        char coordinates[50];
+        sprintf(coordinates, "X: %.2f, Y: %.2f, Z: %.2f", camMain.position.x, camMain.position.y, camMain.position.z);
+        char target[50];
+        sprintf(target, "X: %.2f, Y: %.2f, Z: %.2f", camMain.target.x, camMain.target.y, camMain.target.z);
+        ImGui::Text(coordinates);
+        ImGui::Text(target);
+        ImGui::Separator();
+        ImGui::Text("Object Transform");
+        ImGui::Text("Current Value: %.2f", pos.x);
+            ImGui::SameLine();
+            ImGui::PushItemWidth(100); // Locks the width of the slider
+        ImGui::SliderFloat("X:", &pos.x, -100.0f, 100.0f, "Value: %.2f");
+                ImGui::PopItemWidth(); // Restore previous width
+        ImGui::Text("Current Value: %.2f", pos.y);
+            ImGui::SameLine();
+            ImGui::PushItemWidth(100); // Locks the width of the slider
+        ImGui::SliderFloat("Y:", &pos.y, -100.0f, 100.0f, "Value: %.2f");
+                ImGui::PopItemWidth(); // Restore previous width
+        ImGui::Text("Current Value: %.2f", pos.z);
+            ImGui::SameLine();
+            ImGui::PushItemWidth(100); // Locks the width of the slider
+        ImGui::SliderFloat("Z:", &pos.z, -100.0f, 100.0f, "Value: %.2f");
+                ImGui::PopItemWidth(); // Restore previous width
+        ImGui::Separator();
+        ImGui::Text("Object Rotation");
+        ImGui::Text("Current Value: %.2f", rot.x);
+            ImGui::SameLine();
+            ImGui::PushItemWidth(100); // Locks the width of the slider
+        ImGui::SliderFloat("Pitch:", &rot.x, -360.0f, 360.0f, "Value: %.2f");
+                ImGui::PopItemWidth(); // Restore previous width
+        ImGui::Text("Current Value: %.2f", rot.y);
+            ImGui::SameLine();
+            ImGui::PushItemWidth(100); // Locks the width of the slider
+        ImGui::SliderFloat("Yaw:", &rot.y, -360.0f, 360.0f, "Value: %.2f");
+                ImGui::PopItemWidth(); // Restore previous width
+        ImGui::Text("Current Value: %.2f", rot.z);
+            ImGui::SameLine();
+            ImGui::PushItemWidth(100); // Locks the width of the slider
+        ImGui::SliderFloat("Roll:", &rot.z, -360.0f, 360.0f, "Value: %.2f");
+                ImGui::PopItemWidth(); // Restore previous width
+        ImGui::Separator();
+        ImGui::Text("Current Value: %.2f", scale);
+            ImGui::SameLine();
+            ImGui::PushItemWidth(100); // Locks the width of the slider
+        ImGui::SliderFloat("Scale:", &scale, 0.0f, 100.0f, "Value: %.2f");
+                ImGui::PopItemWidth(); // Restore previous width
+        ImGui::Separator();
+        break;
+    case ToggleState::SaM:
+    {
+        ImGui::Begin("Color Picker");
+        // Advanced RGB color picker
+        ImGui::ColorPicker3("Pick a Color", color);
+        ImGui::End();
+        // Color objectColor = {
+        //     static_cast<unsigned char>(color[0] * 255),
+        //     static_cast<unsigned char>(color[1] * 255),
+        //     static_cast<unsigned char>(color[2] * 255),
+        //     255 // Alpha = 255 (fully opaque)
+        // };
+        // if(sc->selected != nullptr)
+        // {
+        //     sc->selected->SetColor(objectColor);
+        // }
+    }
+        break;
+    default:
+        break;
+    }
     popColors();
     ImGui::End();
-
     // Bottom Menu (unchanged)
     ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
     ImGui::SetNextWindowPos(ImVec2(menuWidth, 750.0f)); // Position: Top-right corner below the main menu bar

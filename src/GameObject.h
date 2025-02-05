@@ -13,6 +13,7 @@ private:
     float scale;            // Uniform scale factor
     Model model;            // Model of the object
     Texture texture;        // Texture for the model
+    Color color = WHITE;
     void SaveToJson();      // Save properties to the JSON file
 public:
     json jsonData;          // JSON object to store properties
@@ -27,7 +28,7 @@ public:
     void SetPosition(Vector3 pos);
     void SetRotation(Vector3 rot);
     void SetScale(float s);
-
+    void SetColor(Color c);
     // Getters
     Vector3 GetPosition() const;
     Vector3 GetRotation() const;

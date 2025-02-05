@@ -12,11 +12,13 @@
 #include "gameobject.h"
 #include "Scene.h"
 #include "json.hpp"
+#include "ToggleState.h"
+
 using json = nlohmann::json; // Alias the namespace for easier usage
 
 class MenuBar {
 public:
-    void ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot,Scene* sc, float& scale);
+    void ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot,Scene* sc, float& scale, ToggleState& state);
     void ProjSelect(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot,Scene* sc, float& scale);
 
 };

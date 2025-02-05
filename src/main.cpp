@@ -10,6 +10,7 @@
 #include "Scene.h"
 #include "json.hpp"
 #include "MenuBar.h"
+#include "ToggleState.h"
 using json = nlohmann::json; // Alias the namespace for easier usage
 
 /*
@@ -85,9 +86,6 @@ int main(void) {
     float velocity = 0.0f; // Initial velocity
     float groundLevel = -5.0f; // Ground level (Y position of the floor)
 
-    Texture2D topMenuBack = LoadTexture("../resources/topMenu.png");
-    Texture2D LRMenuBack = LoadTexture("../resources/leftMenuBack.png");
-    Texture2D botMenuBack = LoadTexture("../resources/bottomMenu.png");
     Image logoImage = LoadImage("../resources/neeflogo/neeflogo3.png");
     //
     Scene scene("TemplateScene");
@@ -128,7 +126,8 @@ int main(void) {
     bool OpenEditor = false;
     SetTargetFPS(60);
     bool mouseMovementEnabled = false;
-
+    //Menu Bar Enum Toggle
+    ToggleState state = ToggleState::Prop;  // Declare toggle state in main
     //temp
     Vector3 position = {0,0,0};
     float scale = 1.0f;
@@ -153,6 +152,31 @@ int main(void) {
             SetWindowFocused();
             SetWindowSize(1000, 700);
         }
+        // Load Files Dropped in Editor
+        if (IsFileDropped())
+        {
+            FilePathList droppedFiles = LoadDroppedFiles();
+
+            if (droppedFiles.count == 1) // Only support one file dropped
+            {
+                if (IsFileExtension(droppedFiles.paths[0], ".obj") ||
+                    IsFileExtension(droppedFiles.paths[0], ".gltf") ||
+                    IsFileExtension(droppedFiles.paths[0], ".glb") ||
+                    IsFileExtension(droppedFiles.paths[0], ".vox") ||
+                    IsFileExtension(droppedFiles.paths[0], ".iqm") ||
+                    IsFileExtension(droppedFiles.paths[0], ".m3d"))       // Model file formats supported
+                {
+                    GameObject* dropped = new GameObject(2, droppedFiles.paths[0], "", "");
+                    position = {0, 0, 0};
+                    rotation = {0, 0, 0};
+                    scale = 1.0f;
+                    scene.AddGameObject(dropped);
+                }
+            }
+
+            UnloadDroppedFiles(droppedFiles);    // Unload filepaths from memory
+        }
+
 
         // Start drawing
         BeginDrawing();
@@ -178,11 +202,6 @@ int main(void) {
             ClearWindowState(FLAG_WINDOW_UNDECORATED);
             screenHeight = GetScreenHeight();
             // Background
-            DrawTexture(LRMenuBack, 0, 0, WHITE);
-            DrawTexture(LRMenuBack, 1520, 0, WHITE);
-            DrawTexture(botMenuBack, 400, 750, WHITE);
-            DrawTexture(topMenuBack, 0, 0, WHITE);
-
             DrawTexture(logoTexture, 5, 5, WHITE);
             DrawFPS(1540, 95);
 
@@ -207,7 +226,7 @@ int main(void) {
 
             if (OpenEditor) 
             {
-                guiMENU.ShowMenuBar(customFont, camMain, position, rotation, &scene, scale);
+                guiMENU.ShowMenuBar(customFont, camMain, position, rotation, &scene, scale, state);
             }
             rlImGuiEnd();
         } 

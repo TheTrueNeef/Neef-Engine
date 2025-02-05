@@ -40,13 +40,15 @@ GameObject::GameObject(int modelID, const std::string& modelPath, const std::str
         texture = LoadTexture(texturePath.c_str());
 
         // Associate texture with model
-        model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
-        std::cout << model.materialCount;
+        std::cout << "Model Material Count: " << model.materialCount << std::endl;
         for (int i = 0; i < model.materialCount; i++) 
         {
-            Material *material = &model.materials[i];
+            model.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
         }
-
+        if (texture.id == 0) 
+        {
+            std::cerr << "Failed to load texture: " << texturePath << std::endl;
+        }
         break;
     default:
         break;
@@ -95,6 +97,11 @@ void GameObject::SetScale(float s) {
     jsonData["scale"] = s;
 }
 
+void GameObject::SetColor(Color c)
+{
+    color = c;
+}
+
 // Getters
 Vector3 GameObject::GetPosition() const {
     return position;
@@ -121,11 +128,10 @@ void GameObject::Draw() {
     {
         DrawCubeWires(position, scale + 0.1f, scale + 0.1f, scale + 0.1f, RED);
     }
-    DrawModel(model, position, scale, WHITE);
+    DrawModel(model, position, scale, color);
 }
 
 void GameObject::clear()
 {
-    
     GameObject::~GameObject();
 }
