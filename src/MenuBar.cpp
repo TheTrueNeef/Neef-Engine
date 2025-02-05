@@ -12,38 +12,75 @@
 #include "json.hpp"
 #include <cstdio>
 #include "ImGuiFileDialog.h"
+#include "tinyfiledialogs.h"
 using json = nlohmann::json; // Alias the namespace for easier usage
 
 void initColors()
 {
     // Tab Button Colors
-    ImGui::PushStyleColor(ImGuiCol_Tab, ImVec4(0.2f, 0.2f, 0.3f, 1.0f));                // Default tab color (dim)
-    ImGui::PushStyleColor(ImGuiCol_TabHovered, ImVec4(0.4f, 0.4f, 0.7f, 1.0f));        // Brighter when hovered
-    ImGui::PushStyleColor(ImGuiCol_TabActive, ImVec4(0.3f, 0.3f, 0.5f, 1.0f));         // Slightly brighter when active
-    ImGui::PushStyleColor(ImGuiCol_TabUnfocused, ImVec4(0.2f, 0.2f, 0.3f, 0.8f));      // Slightly transparent when unfocused
-    ImGui::PushStyleColor(ImGuiCol_TabUnfocusedActive, ImVec4(0.3f, 0.3f, 0.5f, 0.8f)); // Active but unfocused
-    // Menu Item Colors
-    ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.2f, 0.35f, 1.0f));           // Default menu item color
-    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.4f, 0.4f, 0.7f, 1.0f));     // Highlighted when hovered
-    ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.3f, 0.3f, 0.55f, 1.0f));     // Slightly brighter when active
-    // Button Colors
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.2f, 0.6f, 1.0f));      // Button color
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.3f, 0.7f, 1.0f)); // Hovered color
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.1f, 0.5f, 1.0f));  // Active color
-    // Transform and other UI elements (unchanged)
-    ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.4f, 0.2f, 0.6f, 1.0f));      // Button color
-    ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.3f, 0.1f, 0.5f, 1.0f));  // Active color   
-    // Scroll Bar Colors
-    ImGui::PushStyleColor(ImGuiCol_ScrollbarBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f)); // Background Color
-    ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, ImVec4(0.4f, 0.2f, 0.6f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabHovered, ImVec4(0.5f, 0.3f, 0.7f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabActive, ImVec4(0.3f, 0.1f, 0.5f, 1.0f));
-    
+ImGui::PushStyleColor(ImGuiCol_Tab, ImVec4(0.35f, 0.36f, 0.35f, 1.0f));                // Default tab color (dim) - #595B5A
+ImGui::PushStyleColor(ImGuiCol_TabHovered, ImVec4(0.08f, 0.76f, 0.64f, 1.0f));        // Brighter when hovered - #14C3A2
+ImGui::PushStyleColor(ImGuiCol_TabActive, ImVec4(0.05f, 0.90f, 0.66f, 1.0f));         // Slightly brighter when active - #0DE5A8
+ImGui::PushStyleColor(ImGuiCol_TabUnfocused, ImVec4(0.35f, 0.36f, 0.35f, 1.0f));      // Slightly transparent when unfocused - #595B5A
+ImGui::PushStyleColor(ImGuiCol_TabUnfocusedActive, ImVec4(0.05f, 0.90f, 0.66f, 1.0f)); // Active but unfocused - #0DE5A8
+
+// Menu Item Colors
+ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.08f, 0.76f, 0.64f, 1.0f));           // Default menu item color - #14C3A2
+ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.05f, 0.90f, 0.66f, 1.0f));    // Highlighted when hovered - #0DE5A8
+ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.49f, 0.95f, 0.60f, 1.0f));     // Slightly brighter when active - #7CF49A
+
+// Button Colors
+ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.49f, 0.95f, 0.60f, 1.0f));      // Button color - #7CF49A
+ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.72f, 0.99f, 0.60f, 1.0f)); // Hovered color - #B8FD99
+ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.05f, 0.90f, 0.66f, 1.0f));  // Active color - #0DE5A8
+
+// Transform and other UI elements (unchanged)
+ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.49f, 0.95f, 0.60f, 1.0f));      // Button color - #7CF49A
+ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.05f, 0.90f, 0.66f, 1.0f));  // Active color - #0DE5A8
+
+// Scroll Bar Colors
+ImGui::PushStyleColor(ImGuiCol_ScrollbarBg, ImVec4(0.35f, 0.36f, 0.35f, 1.0f)); // Background Color - #595B5A
+ImGui::PushStyleColor(ImGuiCol_ScrollbarGrab, ImVec4(0.08f, 0.76f, 0.64f, 1.0f)); // #14C3A2
+ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabHovered, ImVec4(0.05f, 0.90f, 0.66f, 1.0f)); // #0DE5A8
+ImGui::PushStyleColor(ImGuiCol_ScrollbarGrabActive, ImVec4(0.49f, 0.95f, 0.60f, 1.0f)); // #7CF49A
+
 }
 void popColors()
 {
     int colorsToPop = 17;
     ImGui::PopStyleColor(colorsToPop);
+}
+void ShowFileDialog(bool showFileDialog)
+{
+    if (showFileDialog)
+    {
+        ImGui::OpenPopup("Open File");
+    }
+
+    // Modal popup to force the file dialog to stay on top
+    if (ImGui::BeginPopupModal("Open File", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        // Show file dialog
+        ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey", ImGuiWindowFlags_NoCollapse);
+
+        // If a file is selected
+        if (ImGuiFileDialog::Instance()->IsOk())
+        {
+            std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+            std::cout << "Selected File: " << filePath << std::endl;
+            showFileDialog = false; // Close the modal
+            ImGui::CloseCurrentPopup();
+        }
+
+        // If cancel is pressed
+        if (!ImGuiFileDialog::Instance()->IsOpened())
+        {
+            showFileDialog = false; // Close the modal
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
 }
 void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot, Scene* sc, float& scale) {
     // Use the custom font if it's available
@@ -135,7 +172,6 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
     // Revert style changes
     ImGui::PopStyleVar(2);
     popColors();
-    
     const float menuWidth = 400.0f;
     const float menuHeight = GetScreenHeight() - 50.0f;
     const float menuPos = 42.0f;
@@ -168,9 +204,19 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
             }
             if (ImGui::Selectable("Custom Model")) {
                 // Open the file dialog for custom model selection
-                ImGui::SetNextWindowSize(ImVec2(600, 400));
-                std::cout << "Selected Custom Model" << std::endl;
-                ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose Model", ".obj,.fbx,.gltf");
+                const char *filePath = tinyfd_openFileDialog("Select Model", "", 0, NULL, NULL, 0);
+
+                if (filePath != nullptr) 
+                {
+                    std::string filePathName = filePath;
+
+                    // Create and add a new game object
+                    GameObject* customModel = new GameObject(2, filePathName, "", "");
+                    pos = {0, 0, 0};
+                    rot = {0, 0, 0};
+                    scale = 1.0f;
+                    sc->AddGameObject(customModel);
+                }
             }
             ImGui::EndCombo(); 
         }
@@ -190,16 +236,19 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
         }
         ImGui::EndTabBar();
     }
+
+    if (ImGui::BeginPopup("FileSelectPopup")) {
+    ImGui::Text("Select a model file:");
+    if (ImGui::Button("Choose File")) {
+        ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose Model", ".obj,.fbx,.gltf");
+    }
+
     // Render the file dialog separately
-    if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey")) 
-    {
-        std::cout << "WORKING" << std::endl;
-        if (ImGuiFileDialog::Instance()->IsOk()) 
-        { 
-            // Get the file path
+    if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey")) {
+        if (ImGuiFileDialog::Instance()->IsOk()) { 
             std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
             std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
-
+            
             // Create and add a new game object
             GameObject* customModel = new GameObject(2, filePathName, "", "");
             pos = {0, 0, 0};
@@ -207,8 +256,16 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
             scale = 1.0f;
             sc->AddGameObject(customModel);
         }
-    // Close the file dialog
-    ImGuiFileDialog::Instance()->Close();
+        // Close the file dialog
+        ImGuiFileDialog::Instance()->Close();
+    }
+
+        if (ImGui::Button("Close")) 
+        {
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
     }
     popColors();
     ImGui::End();
@@ -276,7 +333,6 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
     ImGui::Text("Option C");
     popColors();
     ImGui::End();
-
     // Revert to default font if custom font was used
     if (customFont) {
         ImGui::PopFont();
@@ -285,15 +341,13 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
 
 void MenuBar::ProjSelect(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot,Scene* sc, float& scale)
 {
-    
-
     ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f)); // Position: Top-right corner below the main menu bar
-    ImGui::SetNextWindowSize(ImVec2(600, 1000)); // Size: 400px wide, screen height - 50px
+    ImGui::SetNextWindowSize(ImVec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y)); // Size: Windox.x, screen height - Windox.y
     ImGui::Begin("Neef Engine Project Selection", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration);
     ImGui::Text("Neef Engine Project Selection");
         // Start an ImGui window for project selection
-    ImGui::Begin("Project Selection", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin("Project Selection", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove);
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.2f, 0.6f, 1.0f));      // Button color
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.3f, 0.7f, 1.0f)); // Hovered color
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.1f, 0.5f, 1.0f));  // Active color
@@ -320,7 +374,6 @@ void MenuBar::ProjSelect(ImFont* customFont, Camera3D camMain, Vector3& pos, Vec
     ImGui::PopStyleColor(3);
     ImGui::PopFont();
     ImGui::End();
-
     ImGui::Separator();
     ImGui::Text("Option A");
     ImGui::Text("Option B");

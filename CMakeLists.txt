@@ -43,12 +43,17 @@ set(IMGUIFILEDIALOG_SOURCES
     src/ImGuiFileDialog.cpp
 )
 
+set(TINYFILEDIALOGS_SOURCES
+    tinyfiledialogs/tinyfiledialogs.c
+)
+
 # Combine all sources
 set(ALL_SOURCES
     ${SOURCES}
     ${IMGUI_SOURCES}
     ${RLIMGUI_SOURCES}
     ${IMGUIFILEDIALOG_SOURCES}
+    ${TINYFILEDIALOGS_SOURCES}
 )
 
 # Create an executable
@@ -62,6 +67,8 @@ target_include_directories(neef-engine PRIVATE
     raylib/include  # Path to raylib.h
     rlImGui
     src  # For ImGuiFileDialog
+    tinyfiledialogs  # File Dialog
+
 )
 
 # Link against the prebuilt Raylib library
