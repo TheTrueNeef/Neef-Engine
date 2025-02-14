@@ -193,7 +193,6 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
     ImGui::Begin("Objects In Scene", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration);
     ImGui::Text("Objects In Scene");
     ImGui::Separator();
-
     // Add content for the left menu here
     if (ImGui::BeginTabBar("Objects")) {
         if (ImGui::BeginCombo("Add Object", "Add")) {
@@ -205,7 +204,7 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
                 sc->AddGameObject(cube);
             }
             if (ImGui::Selectable("Sphere")) {
-                GameObject* sphere = new GameObject(0, "", "", "");
+                GameObject* sphere = new GameObject(1, "", "", "");
                 pos = {0, 0, 0};
                 rot = {0, 0, 0};
                 scale = 1.0f;
@@ -319,43 +318,43 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
         ImGui::Text(target);
         ImGui::Separator();
         ImGui::Text("Object Transform");
-        ImGui::Text("Current Value: %.2f", pos.x);
             ImGui::SameLine();
             ImGui::PushItemWidth(100); // Locks the width of the slider
         ImGui::SliderFloat("X:", &pos.x, -100.0f, 100.0f, "Value: %.2f");
+        ImGui::Text("%.2f", pos.x);
                 ImGui::PopItemWidth(); // Restore previous width
-        ImGui::Text("Current Value: %.2f", pos.y);
             ImGui::SameLine();
             ImGui::PushItemWidth(100); // Locks the width of the slider
         ImGui::SliderFloat("Y:", &pos.y, -100.0f, 100.0f, "Value: %.2f");
+        ImGui::Text("%.2f", pos.y);
                 ImGui::PopItemWidth(); // Restore previous width
-        ImGui::Text("Current Value: %.2f", pos.z);
             ImGui::SameLine();
             ImGui::PushItemWidth(100); // Locks the width of the slider
         ImGui::SliderFloat("Z:", &pos.z, -100.0f, 100.0f, "Value: %.2f");
+        ImGui::Text("%.2f", pos.z);
                 ImGui::PopItemWidth(); // Restore previous width
         ImGui::Separator();
         ImGui::Text("Object Rotation");
-        ImGui::Text("Current Value: %.2f", rot.x);
             ImGui::SameLine();
             ImGui::PushItemWidth(100); // Locks the width of the slider
         ImGui::SliderFloat("Pitch:", &rot.x, -360.0f, 360.0f, "Value: %.2f");
+        ImGui::Text("%.2f", rot.x);
                 ImGui::PopItemWidth(); // Restore previous width
-        ImGui::Text("Current Value: %.2f", rot.y);
             ImGui::SameLine();
             ImGui::PushItemWidth(100); // Locks the width of the slider
         ImGui::SliderFloat("Yaw:", &rot.y, -360.0f, 360.0f, "Value: %.2f");
+        ImGui::Text("%.2f", rot.y);
                 ImGui::PopItemWidth(); // Restore previous width
-        ImGui::Text("Current Value: %.2f", rot.z);
             ImGui::SameLine();
             ImGui::PushItemWidth(100); // Locks the width of the slider
         ImGui::SliderFloat("Roll:", &rot.z, -360.0f, 360.0f, "Value: %.2f");
+        ImGui::Text("%.2f", rot.z);
                 ImGui::PopItemWidth(); // Restore previous width
         ImGui::Separator();
-        ImGui::Text("Current Value: %.2f", scale);
             ImGui::SameLine();
             ImGui::PushItemWidth(100); // Locks the width of the slider
         ImGui::SliderFloat("Scale:", &scale, 0.0f, 100.0f, "Value: %.2f");
+        ImGui::Text("%.2f", scale);
                 ImGui::PopItemWidth(); // Restore previous width
         ImGui::Separator();
         break;

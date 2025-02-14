@@ -28,7 +28,8 @@ GameObject::GameObject(int modelID, const std::string& modelPath, const std::str
     case 1:
         try
         {
-            model = LoadModelFromMesh(GenMeshSphere(1.0f,1.0f,1.0f));
+            Mesh sphere = GenMeshSphere(1.0f,50,50);
+            model = LoadModelFromMesh(sphere);
         }        
         catch(_exception e)
         {
