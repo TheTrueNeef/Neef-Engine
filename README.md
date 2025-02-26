@@ -8,6 +8,9 @@
 3) cmake --build build ----> in terminal (Ensure CD project directory)
 4) cd build, .\neef-engine.exe
 
+#Project Schedule
+1) April 27: Finish Items 1-4
+
 # TO DO LIST
 0) Project Selection
 1) LUA INTEGRATION SCRIPT EDITOR
