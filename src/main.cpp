@@ -11,6 +11,7 @@
 #include "json.hpp"
 #include "MenuBar.h"
 #include "ToggleState.h"
+#include "projectHub.h"
 using json = nlohmann::json; // Alias the namespace for easier usage
 
 /*
@@ -90,6 +91,7 @@ int main(void) {
     //
     Scene scene("TemplateScene");
     MenuBar guiMENU;
+    projectHub projHub;
     // Color
     Vector3 color = {1.0f, 0.0f, 0.0f};
     //
@@ -244,7 +246,7 @@ int main(void) {
             ClearWindowState(FLAG_WINDOW_UNDECORATED);
             SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT); 
             rlImGuiBegin();
-            guiMENU.ProjSelect(customFont, camMain, position, rotation, &scene, scale);
+            projHub.newWindow(screenWidth, screenHeight);
             rlImGuiEnd();
         } 
         else 

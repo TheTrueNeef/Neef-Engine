@@ -23,6 +23,7 @@ set(SOURCES
     src/MenuBar.cpp
     src/mouse_movement.cpp
     src/Scene.cpp
+    src/projectHub.cpp
 )
 
 # Add source files for dependencies
