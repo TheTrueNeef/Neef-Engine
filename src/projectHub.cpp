@@ -100,20 +100,44 @@ void projectHub::loadProjects() {
 }
 
 void projectHub::newWindow(int width, int height) {
-    ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
-    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f)); // Position: Top-right corner below the main menu bar
-    ImGui::SetNextWindowSize(ImVec2(width, height)); // Size: Windox.x, screen height - Windox.y
-    ImGui::Begin("Neef Engine Project Selection", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration);
+    // Use full screen
+    ImGui::SetNextWindowBgAlpha(1.0f);
+    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+    ImGui::SetNextWindowSize(ImVec2((float)width + 200.0f, (float)height + 250.0f));
+
+    ImGui::Begin("Neef Engine Project Selection", nullptr,
+                 ImGuiWindowFlags_NoMove |
+                 ImGuiWindowFlags_NoCollapse |
+                 ImGuiWindowFlags_NoResize |
+                 ImGuiWindowFlags_NoTitleBar |
+                 ImGuiWindowFlags_NoScrollbar |
+                 ImGuiWindowFlags_NoScrollWithMouse);
+
+    ImGui::SetCursorPos(ImVec2(width * 0.05f, height * 0.05f));  // Padding
     ImGui::Text("Neef Engine Project Selection");
-    // Start an ImGui window for project selection
-    ImGui::Begin("Project Selection", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove);
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.2f, 0.6f, 1.0f));      // Button color
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.3f, 0.7f, 1.0f)); // Hovered color
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.1f, 0.5f, 1.0f));  // Active color
-    
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.2f, 0.6f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.3f, 0.7f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.1f, 0.5f, 1.0f));
+
+    if (ImGui::Button("New Project", ImVec2(200, 40))) {
+        // TODO: Handle new project logic
+    }
+
+    ImGui::Separator();
+    ImGui::Text("Recent Projects:");
+
+    ProjectNode* current = head;
+    while (current) {
+        if (ImGui::Button(current->path.c_str(), ImVec2(300, 30))) {
+            // TODO: Load selected project
+            std::cout << "Selected project: " << current->path << std::endl;
+        }
+        current = current->next;
+    }
+
     ImGui::PopStyleColor(3);
     ImGui::End();
-    ImGui::Separator();
-    // Project buttons
-    ImGui::End();
 }
+
+

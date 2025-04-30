@@ -4,11 +4,11 @@ cmake_minimum_required(VERSION 3.10)
 # Set the project name and version
 project(neef-engine VERSION 1.0)
 
-# Specify the C++ standard (e.g., C++17)
+# Specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Sets build type if not set by now
+# Set default build type to Debug if not specified
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(default_build_type Debug)
     message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
@@ -16,7 +16,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-# Add source files for your project
+# Main source files
 set(SOURCES
     src/GameObject.cpp
     src/main.cpp
@@ -24,9 +24,10 @@ set(SOURCES
     src/mouse_movement.cpp
     src/Scene.cpp
     src/projectHub.cpp
+    src/PhysicsManager.cpp
 )
 
-# Add source files for dependencies
+# Dependencies
 set(IMGUI_SOURCES
     imgui/imgui.cpp
     imgui/imgui_demo.cpp
@@ -35,59 +36,59 @@ set(IMGUI_SOURCES
     imgui/imgui_widgets.cpp
 )
 
-set(RLIMGUI_SOURCES
-    rlImGui/rlImGui.cpp
+set(RLIMGUI_SOURCES rlImGui/rlImGui.cpp)
+set(IMGUIFILEDIALOG_SOURCES src/ImGuiFileDialog.cpp)
+set(TINYFILEDIALOGS_SOURCES tinyfiledialogs/tinyfiledialogs.c)
+
+# Bullet Physics source files
+file(GLOB_RECURSE BULLET_SOURCES
+    physics/src/BulletCollision/*.cpp
+    physics/src/BulletDynamics/*.cpp
+    physics/src/LinearMath/*.cpp
 )
 
-# Add ImGuiFileDialog sources (if applicable)
-set(IMGUIFILEDIALOG_SOURCES
-    src/ImGuiFileDialog.cpp
-)
-
-set(TINYFILEDIALOGS_SOURCES
-    tinyfiledialogs/tinyfiledialogs.c
-)
-
-# Combine all sources
+# All sources combined
 set(ALL_SOURCES
     ${SOURCES}
     ${IMGUI_SOURCES}
     ${RLIMGUI_SOURCES}
     ${IMGUIFILEDIALOG_SOURCES}
     ${TINYFILEDIALOGS_SOURCES}
+    ${BULLET_SOURCES}
 )
 
-# Create an executable
+# Create executable
 add_executable(neef-engine ${ALL_SOURCES})
 
-# Add include directories for specific targets
+# Include directories
 target_include_directories(neef-engine PRIVATE
     include
     json/include/nlohmann
     imgui
-    raylib/include  # Path to raylib.h
+    raylib/include
     rlImGui
-    src  # For ImGuiFileDialog
-    tinyfiledialogs  # File Dialog
+    src
+    tinyfiledialogs
 
+    # Bullet headers
+    physics/src
+    physics/src/BulletCollision
+    physics/src/BulletDynamics
+    physics/src/LinearMath
 )
 
-# Link against the prebuilt Raylib library
+# Link Raylib and system libraries
 if(WIN32)
     target_link_libraries(neef-engine PRIVATE ${CMAKE_SOURCE_DIR}/lib/libraylib.a)
-endif()
-
-# Link required system libraries
-if(WIN32)
     target_link_libraries(neef-engine PRIVATE opengl32 gdi32 winmm)
 elseif(UNIX)
     target_link_libraries(neef-engine PRIVATE GL m pthread dl)
 endif()
 
-# Add resources directory (if needed)
+# Copy resources folder to build directory
 file(COPY resources DESTINATION ${CMAKE_BINARY_DIR}/resources)
 
-# Print the flags for the user
+# Print config
 if (DEFINED CMAKE_BUILD_TYPE)
     message(STATUS "Generated build type: ${CMAKE_BUILD_TYPE}")
 else ()

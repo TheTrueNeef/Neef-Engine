@@ -4,6 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/include",      // Relative path to the 'include' folder in your project
+                "${workspaceFolder}/physics/src",      // Relative path to the 'Physics' folder in your project
                 "${workspaceFolder}/src",          // Relative path to the 'src' folder in your project
                 "${workspaceFolder}/raylib/src", // Raylib headers in an internal folder
                 "${workspaceFolder}/imgui", // Imgui headers in an internal folder

@@ -13,6 +13,7 @@
 #include <cstdio>
 #include "ImGuiFileDialog.h"
 #include "tinyfiledialogs.h"
+#include "PhysicsManager.h"
 
 using json = nlohmann::json; // Alias the namespace for easier usage
 
@@ -92,7 +93,9 @@ void ShowFileDialog(bool showFileDialog)
         ImGui::EndPopup();
     }
 }
-void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot, Scene* sc, float& scale, ToggleState& state, Vector3& color) {
+void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Vector3& rot, Scene* sc, float& scale, ToggleState& state, Vector3& color, 
+                            PhysicsManager& phys, bool& PhysicsSimulating, bool& canCollide, bool& isStatic, float& mass, ColliderType& col) 
+                            {
     // Use the custom font if it's available
     if (customFont) {
         ImGui::PushFont(customFont);
@@ -153,8 +156,11 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
         if (ImGui::BeginMenu("Start")) {
             if (ImGui::MenuItem("Run Game Windowed", "F1")) {
                 // Action to open documentation
+                PhysicsSimulating = true;
+                phys.StartSimulation();
+                std::cout << "Physics Simulation Started" << std::endl;
             }
-            if (ImGui::MenuItem("Run Fullscreen")) {
+            if (ImGui::MenuItem("Run Fullscreen (Unavailable)")) {
                 // Action to show about dialog
             }
             ImGui::EndMenu();
@@ -163,7 +169,9 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
         // Stop menu
         if (ImGui::BeginMenu("Stop")) {
             if (ImGui::MenuItem("\uf059 Stop", "F1")) {
-                // Action to stop code
+                PhysicsSimulating = false;
+                phys.StopSimulation();
+                std::cout << "Physics Simulation Stopped" << std::endl;
             }
             ImGui::EndMenu();
         }
@@ -201,7 +209,10 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
                 pos = {0, 0, 0};
                 rot = {0, 0, 0};
                 scale = 1.0f;
+                cube->physics.mass = 1.0f;                // Dynamic body
+                cube->physics.affectedByGravity = true;   // Gravity enabled
                 sc->AddGameObject(cube);
+                phys.AddObject(cube);
             }
             if (ImGui::Selectable("Sphere")) {
                 GameObject* sphere = new GameObject(1, "", "", "");
@@ -209,6 +220,17 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
                 rot = {0, 0, 0};
                 scale = 1.0f;
                 sc->AddGameObject(sphere);
+                phys.AddObject(sphere);
+
+            }
+            if (ImGui::Selectable("Plane")) {
+                GameObject* plane = new GameObject(3, "", "", "");
+                pos = {0, 0, 0};
+                rot = {0, 0, 0};
+                scale = 1.0f;
+                sc->AddGameObject(plane);
+                phys.AddObject(plane);
+
             }
             if (ImGui::Selectable("Custom Model")) {
                 // Open the file dialog for custom model selection
@@ -226,6 +248,8 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
                         rot = {0, 0, 0};
                         scale = 1.0f;
                         sc->AddGameObject(customModel);
+                        phys.AddObject(customModel);
+
                     }
                 }
                 catch(const std::exception& e)
@@ -237,7 +261,6 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
             }
             ImGui::EndCombo(); 
         }
-
         if (ImGui::Button("Remove")) {
             // Logic for removing the selected object
             if (sc->selected != nullptr) {
@@ -245,7 +268,7 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
                 sc->selected = nullptr;
             }
         }
-
+        ImGui::SameLine();
         if (ImGui::Button("New Scene")) {
             // Logic for creating a new scene
             sc->selected = nullptr;
@@ -287,25 +310,28 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
     popColors();
     ImGui::End();
 
-    // Right Menu (unchanged)
-    ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
-    ImGui::SetNextWindowPos(ImVec2(GetScreenWidth() - menuWidth, menuPos)); // Position: Top-right corner below the main menu bar
-    ImGui::SetNextWindowSize(ImVec2(menuWidth, menuHeight)); // Size: 400px wide, screen height - 50px
-    initColors();
-    ImGui::Begin("Right Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration);
-    ImGui::Text("Right Side Menu");
-    ImGui::Separator();
+    
 // If `ImGuiCol_TabDimmed` and `ImGuiCol_TabDimmedSelected` exist in your version of ImGui, 
 // you can adjust them as well to be more subtle
 
     //enum ToggleState { Prop, SaM, Anim }; //Properties, Shaders and Materials, Animations
     // Object Inspector (unchanged)
-    if (ImGui::BeginTabBar("Object Inspector")) {
-        if (ImGui::TabItemButton("Properties")) {state = ToggleState::Prop;}
-        if (ImGui::TabItemButton("Shaders and Materials")) {state = ToggleState::SaM;}
-        if (ImGui::TabItemButton("Animations")) {state = ToggleState::Anim;}
-        ImGui::EndTabBar();
-    }
+        // Right Menu (unchanged)
+        ImGui::SetNextWindowBgAlpha(1.0f); // Set background alpha to fully opaque (1.0)
+        ImGui::SetNextWindowPos(ImVec2(GetScreenWidth() - menuWidth, menuPos)); // Position: Top-right corner below the main menu bar
+        ImGui::SetNextWindowSize(ImVec2(menuWidth, menuHeight)); // Size: 400px wide, screen height - 50px
+        initColors();
+        ImGui::Begin("Right Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration);
+        ImGui::Text("Right Side Menu");
+        ImGui::Separator();
+        if (ImGui::BeginTabBar("Object Inspector")) {
+            if (ImGui::TabItemButton("Properties")) {state = ToggleState::Prop;}
+            if (ImGui::TabItemButton("Shaders and Materials")) {state = ToggleState::SaM;}
+            if (ImGui::TabItemButton("Animations")) {state = ToggleState::Anim;}
+            ImGui::EndTabBar();
+        }
+    const char* shapeOptions[] = { "Box", "Sphere", "Capsule", "Cylinder", "Cone", "Plane", "None" };
+    static int selectedShape = 0;
     switch (state)
     {
     case ToggleState::Prop:
@@ -318,45 +344,58 @@ void MenuBar::ShowMenuBar(ImFont* customFont, Camera3D camMain, Vector3& pos, Ve
         ImGui::Text(target);
         ImGui::Separator();
         ImGui::Text("Object Transform");
-            ImGui::SameLine();
-            ImGui::PushItemWidth(100); // Locks the width of the slider
+            //ImGui::SameLine();
+            //ImGui::PushItemWidth(100); // Locks the width of the slider
         ImGui::SliderFloat("X:", &pos.x, -100.0f, 100.0f, "Value: %.2f");
-        ImGui::Text("%.2f", pos.x);
-                ImGui::PopItemWidth(); // Restore previous width
-            ImGui::SameLine();
-            ImGui::PushItemWidth(100); // Locks the width of the slider
+        // ImGui::Text("%.2f", pos.x);
+        //         ImGui::PopItemWidth(); // Restore previous width
+        //     ImGui::SameLine();
+        //     ImGui::PushItemWidth(100); // Locks the width of the slider
         ImGui::SliderFloat("Y:", &pos.y, -100.0f, 100.0f, "Value: %.2f");
-        ImGui::Text("%.2f", pos.y);
-                ImGui::PopItemWidth(); // Restore previous width
-            ImGui::SameLine();
-            ImGui::PushItemWidth(100); // Locks the width of the slider
+        // ImGui::Text("%.2f", pos.y);
+        //         ImGui::PopItemWidth(); // Restore previous width
+        //     ImGui::SameLine();
+        //     ImGui::PushItemWidth(100); // Locks the width of the slider
         ImGui::SliderFloat("Z:", &pos.z, -100.0f, 100.0f, "Value: %.2f");
-        ImGui::Text("%.2f", pos.z);
-                ImGui::PopItemWidth(); // Restore previous width
-        ImGui::Separator();
+        // ImGui::Text("%.2f", pos.z);
+        //         ImGui::PopItemWidth(); // Restore previous width
+        // ImGui::Separator();
         ImGui::Text("Object Rotation");
-            ImGui::SameLine();
-            ImGui::PushItemWidth(100); // Locks the width of the slider
+            // ImGui::SameLine();
+            // ImGui::PushItemWidth(100); // Locks the width of the slider
         ImGui::SliderFloat("Pitch:", &rot.x, -360.0f, 360.0f, "Value: %.2f");
-        ImGui::Text("%.2f", rot.x);
-                ImGui::PopItemWidth(); // Restore previous width
-            ImGui::SameLine();
-            ImGui::PushItemWidth(100); // Locks the width of the slider
+        // ImGui::Text("%.2f", rot.x);
+        //         ImGui::PopItemWidth(); // Restore previous width
+        //     ImGui::SameLine();
+        //     ImGui::PushItemWidth(100); // Locks the width of the slider
         ImGui::SliderFloat("Yaw:", &rot.y, -360.0f, 360.0f, "Value: %.2f");
-        ImGui::Text("%.2f", rot.y);
-                ImGui::PopItemWidth(); // Restore previous width
-            ImGui::SameLine();
-            ImGui::PushItemWidth(100); // Locks the width of the slider
+        // ImGui::Text("%.2f", rot.y);
+        //         ImGui::PopItemWidth(); // Restore previous width
+        //     ImGui::SameLine();
+        //     ImGui::PushItemWidth(100); // Locks the width of the slider
         ImGui::SliderFloat("Roll:", &rot.z, -360.0f, 360.0f, "Value: %.2f");
-        ImGui::Text("%.2f", rot.z);
-                ImGui::PopItemWidth(); // Restore previous width
+        // ImGui::Text("%.2f", rot.z);
+        //         ImGui::PopItemWidth(); // Restore previous width
         ImGui::Separator();
-            ImGui::SameLine();
-            ImGui::PushItemWidth(100); // Locks the width of the slider
+            // ImGui::SameLine();
+            // ImGui::PushItemWidth(100); // Locks the width of the slider
+            ImGui::Text("Object Scale");
         ImGui::SliderFloat("Scale:", &scale, 0.0f, 100.0f, "Value: %.2f");
-        ImGui::Text("%.2f", scale);
-                ImGui::PopItemWidth(); // Restore previous width
+        // ImGui::Text("%.2f", scale);
+                // ImGui::PopItemWidth(); // Restore previous width
         ImGui::Separator();
+            ImGui::Text("Physical Properties");
+        ImGui::SliderFloat("Mass:", &mass, 0.0f, 100.0f, "Value: %.2f");
+        ImGui::Checkbox("Collider", &canCollide);
+        ImGui::SameLine();
+        ImGui::Dummy(ImVec2(20, 0));  // Add horizontal space
+        ImGui::SameLine();
+        ImGui::Checkbox("Effected by Gravity", &isStatic);
+
+        if (ImGui::Combo("Collider Shape", &selectedShape, shapeOptions, IM_ARRAYSIZE(shapeOptions))) 
+        {
+            col = static_cast<ColliderType>(selectedShape);
+        }
         break;
     case ToggleState::SaM:
     {

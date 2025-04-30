@@ -4,6 +4,8 @@
 #include <iostream> // For error reporting
 #include <string>
 #include "json.hpp"
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 using json = nlohmann::json; // Alias the namespace for easier usage
 
@@ -69,6 +71,30 @@ void Scene::Update() {
     for (auto* gameObject : gameObjects) {
         gameObject->Update();
     }
+}
+
+
+GameObject* Scene::RaycastSelect(Camera3D camera, PhysicsManager& physManager) {
+    Vector2 mousePos = GetMousePosition();
+
+    Ray ray = GetMouseRay(mousePos, camera);
+    btVector3 rayFrom(ray.position.x, ray.position.y, ray.position.z);
+    btVector3 rayTo(ray.position.x + ray.direction.x * 1000,
+                    ray.position.y + ray.direction.y * 1000,
+                    ray.position.z + ray.direction.z * 1000);
+
+    btCollisionWorld::ClosestRayResultCallback rayCallback(rayFrom, rayTo);
+    physManager.GetWorld()->rayTest(rayFrom, rayTo, rayCallback);
+
+    if (rayCallback.hasHit()) {
+        btRigidBody* hitBody = (btRigidBody*)btRigidBody::upcast(rayCallback.m_collisionObject);
+        for (GameObject* obj : gameObjects) {
+            if (obj->physics.rigidBody == hitBody) {
+                return obj;
+            }
+        }
+    }
+    return nullptr;
 }
 
 // Draw all GameObjects

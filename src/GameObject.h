@@ -3,24 +3,49 @@
 
 #include "raylib.h"
 #include <string>
-#include "json.hpp" // Include the JSON library
-using json = nlohmann::json; // Alias the namespace for easier usage
+#include "json.hpp"
+#include <btBulletDynamicsCommon.h>
+#include "PhysicsManager.h"
+
+using json = nlohmann::json;
+
+enum class ColliderType {
+    Box,
+    Sphere,
+    Capsule,
+    Cylinder,
+    Cone,
+    Plane,
+    None
+};
 
 class GameObject {
 private:
-    Vector3 position;       // Position of the object
-    Vector3 rotation;       // Rotation of the object
-    float scale;            // Uniform scale factor
-    Model model;            // Model of the object
-    Texture texture;        // Texture for the model
+    Vector3 position;
+    Vector3 rotation;
+    float scale;
+    Model model;
+    Texture texture;
     Color color = WHITE;
-    void SaveToJson();      // Save properties to the JSON file
+    void SaveToJson();
+
 public:
-    json jsonData;          // JSON object to store properties
-    std::string jsonFilename; // JSON filename for saving/loading
+    // Physics-related properties
+    struct PhysicsComponent {
+        float mass{1.0f};
+        bool affectedByGravity{false};
+        bool canCollide{false};
+        Vector3 originalPosition; // Backup for reset
+        btRigidBody* rigidBody{nullptr}; // Bullet RigidBody
+    } physics;
+
+    ColliderType colliderType = ColliderType::Box;
+
+    json jsonData;
+    std::string jsonFilename;
     bool isSelected{false};
     int CUBE_ID{0}, MODEL_ID{1};
-    // Constructor and Destructor
+
     GameObject(int modelID, const std::string& modelPath, const std::string& texturePath, const std::string& jsonFilename);
     ~GameObject();
 
@@ -29,15 +54,23 @@ public:
     void SetRotation(Vector3 rot);
     void SetScale(float s);
     void SetColor(Color c);
+    void SetColliderType(ColliderType type) { colliderType = type; }
+
     // Getters
     Vector3 GetPosition() const;
     Vector3 GetRotation() const;
     float GetScale() const;
+    ColliderType GetColliderType() const { return colliderType; }
 
-    // Update and Draw
+    // Physics setup
+    void SetupPhysics(btDiscreteDynamicsWorld* world);
+    void RemovePhysics(btDiscreteDynamicsWorld* world);
+    void ResetPosition();
+    void UpdatePhysics(btDiscreteDynamicsWorld* world);
+    
+    void DrawColliderDebug();
     void Update();
     void Draw();
-
     void clear();
 };
 

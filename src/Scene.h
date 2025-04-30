@@ -23,7 +23,7 @@ public:
 
     GameObject* GetGameObjectByIndex(size_t index);          // Get GameObject by index
     GameObject* GetGameObjectByName(const std::string& name); // Get GameObject by name
-
+    GameObject* RaycastSelect(Camera3D camera, PhysicsManager& physManager);
     void Update();
     void Draw();
 

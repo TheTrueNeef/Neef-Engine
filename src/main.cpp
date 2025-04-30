@@ -12,6 +12,7 @@
 #include "MenuBar.h"
 #include "ToggleState.h"
 #include "projectHub.h"
+#include "PhysicsManager.h"
 using json = nlohmann::json; // Alias the namespace for easier usage
 
 /*
@@ -83,9 +84,12 @@ int main(void) {
     float sensitivity = 0.1f;
     
     // Physics
-    float gravity = -9.8f; // Gravity force (downwards)
-    float velocity = 0.0f; // Initial velocity
-    float groundLevel = -5.0f; // Ground level (Y position of the floor)
+    PhysicsManager physicsManager;
+    bool PhysicsSimulating = false;
+    bool canCollide = false;
+    bool isStatic = false;
+    float mass = 1.0f;
+    ColliderType colType = ColliderType::Box;
 
     Image logoImage = LoadImage("../resources/neeflogo/neeflogo3.png");
     //
@@ -180,9 +184,29 @@ int main(void) {
             UnloadDroppedFiles(droppedFiles);    // Unload filepaths from memory
         }
 
-
+        
         // Start drawing
         BeginDrawing();
+        //Calculating Physics Frame Timer
+        physicsManager.Update(GetFrameTime());  // Bullet stepSimulation()
+        scene.Update();                         // Sync GameObjects with Bullet
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && OpenEditor && !PhysicsSimulating) {
+            GameObject* hit = scene.RaycastSelect(camMain, physicsManager);
+            if (hit != nullptr) {
+                position = hit->GetPosition();
+                rotation = hit->GetRotation();
+                scale = hit->GetScale();
+                //Physics Settings based on inspector
+                mass = hit->physics.mass;
+                canCollide = hit->physics.canCollide;
+                isStatic = hit->physics.affectedByGravity;
+                colType = hit->colliderType;
+                scene.selected->UpdatePhysics(physicsManager.GetWorld());
+                scene.selected = hit;
+                std::cout << "Selected object!\n";
+            }
+        }        
 
         if (OpenEditor) 
         {
@@ -211,10 +235,19 @@ int main(void) {
             BeginScissorMode(400, 30, 1120, 720);
             if (scene.selected != nullptr) 
             {
-                scene.selected->isSelected = true;
-                scene.selected->SetPosition(position);
-                scene.selected->SetRotation(rotation);
-                scene.selected->SetScale(scale);
+                if(!PhysicsSimulating)
+                {
+                    scene.selected->isSelected = true;
+                    scene.selected->SetPosition(position);
+                    scene.selected->SetRotation(rotation);
+                    scene.selected->SetScale(scale);
+                    //Physics Settings based on inspector
+                    scene.selected->physics.mass = mass;
+                    scene.selected->physics.canCollide = canCollide;
+                    scene.selected->physics.affectedByGravity = isStatic;
+                    scene.selected->colliderType = colType;
+                    scene.selected->UpdatePhysics(physicsManager.GetWorld());
+                }
                 Color objectColor = {
                     static_cast<unsigned char>(color.x * 255),
                     static_cast<unsigned char>(color.y * 255),
@@ -236,7 +269,7 @@ int main(void) {
 
             if (OpenEditor) 
             {
-                guiMENU.ShowMenuBar(customFont, camMain, position, rotation, &scene, scale, state, color);
+                guiMENU.ShowMenuBar(customFont, camMain, position, rotation, &scene, scale, state, color, physicsManager, PhysicsSimulating, canCollide, isStatic, mass, colType);
             }
             rlImGuiEnd();
         } 
@@ -246,7 +279,7 @@ int main(void) {
             ClearWindowState(FLAG_WINDOW_UNDECORATED);
             SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT); 
             rlImGuiBegin();
-            projHub.newWindow(screenWidth, screenHeight);
+            projHub.newWindow(800, 450);
             rlImGuiEnd();
         } 
         else 
