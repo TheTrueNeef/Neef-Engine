@@ -69,7 +69,9 @@ int main(void) {
     SetWindowMinSize(800,450);
     Image icon = LoadImage("../resources/neeflogo/icon.png");
     SetWindowIcon(icon);
-    SetExitKey(KEY_B && KEY_A);
+    UnloadImage(icon); // Needed if continuously loaded.
+    SetTargetFPS(60); // Set target frames-per-second
+    SetExitKey(0); // Disable exit key (ESC) to prevent closing the window
     // Camera setup
     Camera3D camMain = {0};
     camMain.position = (Vector3){0.0f, 10.0f, 10.0f}; // Camera position
